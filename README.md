@@ -1,5 +1,5 @@
 ![language: c++17](https://img.shields.io/badge/c++-17-blue.svg)
-![unlicense](https://img.shields.io/badge/Unlicense-%23373737)
+[![unlicense](https://img.shields.io/badge/Unlicense-%23373737)](https://unlicense.org/)
 
 # ⚒ Dojima
 
@@ -13,7 +13,7 @@
 - [ ] skeletal animation
 - [ ] facial animation
 - [ ] extra-data
-- [ ] handle float16 buffers
+- [ ] float16 buffers
 
 ### Quick start
 
