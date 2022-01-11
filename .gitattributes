@@ -1,1 +1,2 @@
-third_party/niflib/* linguist-vendored
+* linguist-vendored
+*.cc linguist-vendored=false
