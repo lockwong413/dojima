@@ -1,7 +1,9 @@
+![language: c++17](https://img.shields.io/badge/c++-17-blue.svg)
+![unlicense](https://img.shields.io/badge/Unlicense-%23373737)
+
 # ⚒ Dojima
 
-**Dojima** is a tool to convert data files from the game « _Way of the Samurai 4_ » from Gamebryo's `NIF` format to Khronos `glTF 2.0`.
-It is written in C++17.
+**Dojima** is a command line tool to convert data files from the game « _Way of the Samurai 4_ » from NetImmerse / Gamebryo `NIF` format to `glTF 2.0`.
 
 #### Features
 
