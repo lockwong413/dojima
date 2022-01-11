@@ -1,19 +1,18 @@
-# 🛠 ⚒ Dojima('s forge)
+# ⚒ Dojima('s forge)
 
 **Dojima** is a library and a tool to convert data files from the game « _Way of the Samurai 4_ » from Gamebryo `NIF` to Khronos `glTF 2.0`.
 
-<details>
-  <summary><strong>Quick start & run !</strong></summary>
+### Quick start
 
 ```bash
-# Clone the project with its submodule.
-git clone --recurse-submodules -j4 https://github.com/tcoppex/dojima
+# Clone the project.
+git clone https://github.com/tcoppex/dojima
 cd dojima
 
 # Create a build directory.
 mkdir BUILD && cd BUILD
 
-# Compile using Ninja.
+# Compile using Ninja as generator (optional).
 cmake .. -GNinja -DCMAKE_BUILD_TYPE=Release
 cmake --build .
 
@@ -21,19 +20,17 @@ cmake --build .
 #../bin/nif2gltf /path/to/wots4/Common/Character/Model/Pack/Dog01.nif
 ```
 
-</details>
-
-## Acknowledgment
+### Acknowledgment
 
 Dojima is shipped with modified version of its third parties in accordance to their
 respective license. They are :
 
-* [niflib](https://github.com/niftools/niflib) : library for Nif IO. 
+* [niflib](https://github.com/niftools/niflib) : library for nif IO. 
 * [tinygltf](https://github.com/syoyo/tinygltf) : library for glTF 2.0 IO.
 
-## (Un)License
+### Unlicense
 
-Dojima is released under `The Unlicense`.
+_**Dojima**_ is released under *The Unlicense*.
 
 <!-- 
 ## Notes
