@@ -1,6 +1,17 @@
-# ⚒ Dojima('s forge)
+# ⚒ Dojima
 
-**Dojima** is a library and a tool to convert data files from the game « _Way of the Samurai 4_ » from Gamebryo `NIF` to Khronos `glTF 2.0`.
+**Dojima** is a tool to convert data files from the game « _Way of the Samurai 4_ » from Gamebryo's `NIF` format to Khronos `glTF 2.0`.
+It is written in C++17.
+
+#### Features
+
+- [x] mesh hierarchy
+- [ ] materials
+- [ ] bones
+- [ ] skeletal animation
+- [ ] facial animation
+- [ ] extra-data
+- [ ] handle float16 buffers
 
 ### Quick start
 
@@ -22,11 +33,15 @@ cmake --build .
 
 ### Acknowledgment
 
-Dojima is shipped with modified version of its third parties in accordance to their
+Dojima is shipped with modified versions of its third parties in accordance to their
 respective license. They are :
 
 * [niflib](https://github.com/niftools/niflib) : library for nif IO. 
 * [tinygltf](https://github.com/syoyo/tinygltf) : library for glTF 2.0 IO.
+* [stb_image](https://github.com/nothings/stb) : image loading/decoding from file/memory.
+* [json.hpp](https://github.com/nlohmann/json) : JSON for Modern C++.
+
+`ACQUIRE`'s _Way of the Samurai 4_ can be acquired from steam [here](https://store.steampowered.com/app/312780/Way_of_the_Samurai_4/).
 
 ### Unlicense
 
