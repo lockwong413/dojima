@@ -7,13 +7,13 @@
 
 #### Features
 
-- [x] mesh hierarchy
+- [x] mesh hierarchy (Characters part & pack)
+- [ ] float16 buffers (Items, Maps & Weapons)
 - [ ] materials
-- [ ] bones
+<!-- - [ ] bones -->
 - [ ] skeletal animation
 - [ ] facial animation
 - [ ] extra properties
-- [ ] float16 buffers
 
 ### Quick start
 
