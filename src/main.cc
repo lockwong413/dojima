@@ -15,6 +15,10 @@
 #include "nif/obj/NiMesh.h"
 #include "nif/obj/NiNode.h"
 
+#include "nif/obj/NiIntegerExtraData.h"
+#include "nif/obj/NiStringExtraData.h"
+#include "nif/obj/NiPixelData.h"
+
 #define TINYGLTF_NOEXCEPTION
 #define TINYGLTF_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
@@ -40,7 +44,7 @@ static constexpr bool kDisplayHeader = false;
 static constexpr bool kDebugOutput = true;
 
 // Output name for accessors.
-static constexpr bool kNameAccessors = true;
+static constexpr bool kNameAccessors = false;
 
 // OS specific path separator.
 static constexpr char kSystemPathSeparator{
@@ -366,7 +370,7 @@ int main(int argc, char *argv[]) {
       // Bypass unused meshData.
       if ((usage == Niflib::USAGE_SHADER_CONSTANT) ||
           (usage == Niflib::USAGE_USER)) {
-        DOJIMA_QUIET_LOG( "[Warning] A " << usage << " MeshData was not used." );
+        // DOJIMA_QUIET_LOG( "[Warning] A " << usage << " MeshData was not used." );
         continue;
       }
 
@@ -485,66 +489,124 @@ int main(int argc, char *argv[]) {
   // Setup node hierarchy.
 
   std::vector< tinygltf::Node > Nodes;
+  
+  // Determine the total number of hierarchical subnodes.
+  size_t totalNodeCount = 0;
+  for (auto const& n : nifList) {
+    auto ptr = Niflib::DynamicCast<Niflib::NiAVObject>(n);
+    totalNodeCount += (ptr != nullptr) ? 1 : 0;
+  }
+  Nodes.reserve( totalNodeCount );
 
-  auto nifTree = Niflib::ReadNifTree(nifFilename);
-  if (auto nifRoot = Niflib::DynamicCast<Niflib::NiNode>(nifTree); nullptr != nifRoot) {
 
-    // Determine the total number of hierarchical subnodes.
-    size_t totalNodeCount = 0;
-    for (auto const& n : nifList) {
-      auto ptr = Niflib::DynamicCast<Niflib::NiAVObject>(n);
-      totalNodeCount += (ptr != nullptr) ? 1 : 0;
-    }
-    Nodes.reserve( totalNodeCount );
-
-    // Define a recursive lambda function to fill the node hierarchy.
-    std::function<void(tinygltf::Node*const, Niflib::NiAVObject *const)> fillNodes;
+  // Define a recursive lambda function to fill the node hierarchy.
+  std::function<void(tinygltf::Node*const, Niflib::NiAVObject *const)> fillNodes;
+  
+  fillNodes = [&mapMeshNameToId, &Nodes, &fillNodes](tinygltf::Node *const parent, Niflib::NiAVObject *const nifAVO) -> void {
+    // Get reference to a new node.
+    Nodes.push_back( tinygltf::Node() );
+    auto &node = Nodes.back();
     
-    fillNodes = [&mapMeshNameToId, &Nodes, &fillNodes](tinygltf::Node *const parent, Niflib::NiAVObject *const nifAVO) -> void {
-      // Get reference to a new node.
-      Nodes.push_back( tinygltf::Node() );
-      auto &node = Nodes.back();
-      
-      // Set node as its parent's children.
-      if (parent) {
-        int const nodeIndex = static_cast<int>(Nodes.size() - 1);
-        parent->children.push_back(nodeIndex);
-      }
+    // Set node as its parent's children.
+    if (parent) {
+      int const nodeIndex = static_cast<int>(Nodes.size() - 1);
+      parent->children.push_back(nodeIndex);
+    }
 
-      node.name = nifAVO->GetName();
-      // std::cerr << node.name << std::endl;      
-      
-      auto const& qRotation = nifAVO->GetLocalRotation().AsQuaternion();
-      node.rotation = { qRotation.w, qRotation.x, qRotation.y, qRotation.z };
-
-      auto const fScale = nifAVO->GetLocalScale();
-      node.scale = { fScale, fScale, fScale };
-      
-      auto const &vTranslation = nifAVO->GetLocalTranslation();
-      node.translation = { vTranslation.x, vTranslation.y, vTranslation.z };
-
-      if (auto nifMesh = Niflib::DynamicCast<Niflib::NiMesh>(nifAVO); nifMesh) {
-        node.mesh = mapMeshNameToId[node.name];
-      }
-
-      // Detect meshLOD node (nifSwitchNode).
-      // if (auto nifSwitchNode = Niflib::DynamicCast<Niflib::NiSwitchNode>(nifAVO); nifSwitchNode) {}
-
-      // Handle extra datas.
-      // auto const& listXD = nifAVO->GetExtraData();
-      // node.extras; // TODO    
-
-      // Continue processing if the nif object is a pure node (and not only a leaf).
-      if (auto nifNode = Niflib::DynamicCast<Niflib::NiNode>(nifAVO); nifNode) {
-        if (nifNode->IsSkeletonRoot()) {
-          // node.skin;
-        }
-        for (auto &child : nifNode->GetChildren()) {
-          fillNodes(&node, child);
-        }
-      }
+    node.name = nifAVO->GetName();
+    // std::cerr << node.name << std::endl;
+    
+    auto pside = [](float x) -> float {
+      float const ax = std::abs(x);
+      return (ax < 0.1f) ? ax : x; 
     };
-    fillNodes(nullptr, nifRoot);
+
+    auto const& qRotation = nifAVO->GetLocalRotation().AsQuaternion();
+    node.rotation = { qRotation.x, qRotation.y, qRotation.z, qRotation.w };
+
+    auto const fScale = nifAVO->GetLocalScale();
+    node.scale = { fScale, fScale, fScale };
+
+    auto const &vTranslation = nifAVO->GetLocalTranslation();
+    node.translation = { vTranslation.x, vTranslation.y, vTranslation.z };
+
+    if (auto nifMesh = Niflib::DynamicCast<Niflib::NiMesh>(nifAVO); nifMesh) {
+      node.mesh = mapMeshNameToId[node.name];
+    }
+
+    // Detect meshLOD node (nifSwitchNode).
+    // if (auto nifSwitchNode = Niflib::DynamicCast<Niflib::NiSwitchNode>(nifAVO); nifSwitchNode) {}
+
+    // Handle extra datas.
+    // auto const& listXD = nifAVO->GetExtraData();
+    // node.extras; // TODO    
+
+    // Continue processing if the nif object is a pure node (and not only a leaf).
+    if (auto nifNode = Niflib::DynamicCast<Niflib::NiNode>(nifAVO); nifNode) {
+      if (nifNode->IsSkeletonRoot()) {
+        // node.skin;
+      }
+      for (auto &child : nifNode->GetChildren()) {
+        fillNodes(&node, child);
+      }
+    }
+  };
+
+  // -----------------------------
+
+  /// (for Characters Pack)
+  ///  The first node is a "NiIntegerExtraData" and contains the number of
+  ///   "NiStringExtraData" on the upper root.
+  ///
+  /// For each NiStringExtraData, if the following object has the consecutive index
+  /// it contains the path for its "part".
+  /// The following object is either a NiNode or a NiPixelData.
+  /// (determining the mesh and its texture)
+
+  // Detects if the NIF file is a pack.
+  unsigned int numSubParts = 0;
+  if (auto first = Niflib::DynamicCast<Niflib::NiIntegerExtraData>(nifList[0]); first) {
+    numSubParts = first->GetData() / 2;
+  }
+  if (numSubParts > 0) {
+    struct PartInfo_t {
+      int path_id = -1; // index to a NiStringExtraData containing a path.
+      int data_id = -1; // index to either a NiNode or a NiPixelData.
+    };
+    
+    std::vector<PartInfo_t> nodeParts;
+    nodeParts.reserve(numSubParts);
+    
+    std::vector<PartInfo_t> pixelParts;
+    pixelParts.reserve(numSubParts);
+
+    // Retrieve each part infos.    
+    for (int i = 0; i < (int)nifList.size(); ++i) {
+      auto n0 = nifList[i];
+      if (auto nifString = Niflib::DynamicCast<Niflib::NiStringExtraData>(n0); nifString) {
+        auto n1 = nifList[i+1];
+        if (auto nifNode = Niflib::DynamicCast<Niflib::NiNode>(n1); nifNode && (nifNode->GetName() == "SceneNode")) {
+          nodeParts.push_back( {i, i+1} );
+          ++i; continue;
+        }
+        if (auto nifPixelData = Niflib::DynamicCast<Niflib::NiPixelData>(n1); nifPixelData) {
+          pixelParts.push_back( {i, i+1} );
+          ++i; continue;
+        }
+      }
+    }
+
+    // Append the node part to the nodes hierarchy.
+    for (size_t i = 0; i < nodeParts.size(); ++i) {
+      auto upperNode = Niflib::DynamicCast<Niflib::NiNode>( nifList[ nodeParts[i].data_id ] );
+      fillNodes(nullptr, upperNode);
+
+      // TODO :
+      //  * set mesh part path.
+      //  * set pixel data.
+    }
+  } else if (auto upperNode = Niflib::DynamicCast<Niflib::NiNode>(nifList[0]); upperNode) {
+    fillNodes(nullptr, upperNode);
   }
 
   // --------------
@@ -564,6 +626,7 @@ int main(int argc, char *argv[]) {
     //data.images;
     //data.textures;
     //data.samplers;
+
     //data.skins;
     //data.animations;
 
