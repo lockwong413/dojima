@@ -1,9 +1,9 @@
-![language: c++17](https://img.shields.io/badge/c++-17-blue.svg)
 [![unlicense](https://img.shields.io/badge/Unlicense-%23373737)](https://unlicense.org/)
+![language: c++17](https://img.shields.io/badge/c++-17-blue.svg)
 
 # ⚒ Dojima
 
-**Dojima** is a command line tool to convert data files from the game « _Way of the Samurai 4_ » from NetImmerse / Gamebryo `NIF` format to `glTF 2.0`.
+**Dojima** is a command line tool to convert data files from the game « _Way of the Samurai 4_ » from the NetImmerse / Gamebryo `NIF` format to `glTF 2.0`.
 
 #### Features
 
@@ -12,7 +12,7 @@
 - [ ] bones
 - [ ] skeletal animation
 - [ ] facial animation
-- [ ] extra-data
+- [ ] extra properties
 - [ ] float16 buffers
 
 ### Quick start
