@@ -11,14 +11,14 @@
 #include "nif/niflib.h"
 
 #include "nif/gen/Header.h"
+#include "nif/obj/NiDataStream.h"
 #include "nif/obj/NiMesh.h"
 #include "nif/obj/NiNode.h"
-#include "nif/obj/NiDataStream.h"
 
+#define TINYGLTF_NOEXCEPTION
 #define TINYGLTF_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-#define TINYGLTF_NOEXCEPTION // optional. disable exception handling.
 #include "tinygltf/tiny_gltf.h"
 
 // ----------------------------------------------------------------------------
@@ -26,33 +26,40 @@
 #define DOJIMA_LOG(x) std::cerr << x << std::endl
 
 #ifndef NDEBUG
-#define DOJIMA_LOG_QUIET(x)  DOJIMA_LOG(x)
+#define DOJIMA_QUIET_LOG(x)  DOJIMA_LOG(x)
 #else
-#define DOJIMA_LOG_QUIET(x)  if (static bool b=false; !b && (b=true)) DOJIMA_LOG("(quiet log) " << x)
+#define DOJIMA_QUIET_LOG(x)  if (static bool b=false; !b && (b=true)) DOJIMA_LOG("(quiet log) " << x)
 #endif
 
 // ----------------------------------------------------------------------------
 
+// Display NIF header information at loading.
 static constexpr bool kDisplayHeader = false;
 
+// Force the output filename to "out.gltf".
+static constexpr bool kDebugOutput = true;
+
+// Output name for accessors.
+static constexpr bool kNameAccessors = true;
+
+// OS specific path separator.
+static constexpr char kSystemPathSeparator{
+#if defined(WIN32) || defined(_WIN32)
+  '\\'
+#else
+  '/'
+#endif
+};
+
 // ----------------------------------------------------------------------------
 
-// Key of interests.
-std::string const kNiDataStreamKey{ "NiDataStream" };
-std::string const kNiMeshKey{ "NiMesh" };
-std::string const kNiNodeKey{ "NiNode" };
-
-// ----------------------------------------------------------------------------
-
-// Globals buffers type output in the GLTF.
-enum class BufferType : uint8_t {
+enum class BufferId : uint8_t {
   INDEX,
   VERTEX,
 
   kCount
 };
 
-// Attributes output in the GLTF file.
 enum class AttributeId : uint8_t {
   Position,
   Texcoord,
@@ -64,6 +71,12 @@ enum class AttributeId : uint8_t {
   
   kCount
 };
+
+// ----------------------------------------------------------------------------
+
+// NIF node keys of interest.
+std::string const kNiDataStreamKey{ "NiDataStream" };
+std::string const kNiMeshKey{ "NiMesh" };
 
 // ----------------------------------------------------------------------------
 
@@ -100,7 +113,7 @@ static bool SetAttribute(Niflib::SemanticData cs, size_t accessorIndex, tinygltf
     *bNormalized = true;
   }
   else {
-    DOJIMA_LOG_QUIET( "[Warning] " << __FUNCTION__ << " : " << name << " component not used." ); 
+    DOJIMA_QUIET_LOG( "[Warning] " << __FUNCTION__ << " : " << name << " component not used." ); 
     return false;
   }
 
@@ -117,9 +130,12 @@ static uint32_t GetPrimitiveType(Niflib::MeshPrimitiveType primType) {
 
     case Niflib::MESH_PRIMITIVE_LINESTRIPS:
     return TINYGLTF_MODE_LINE_STRIP;
-
-    default: 
+    
     case Niflib::MESH_PRIMITIVE_POINTS:
+    return TINYGLTF_MODE_POINTS;
+
+    default:
+      DOJIMA_QUIET_LOG( "[Warning] " << __FUNCTION__ << " : primitive type " << primType << " is not supported." ); 
     return TINYGLTF_MODE_POINTS;
   };
 }
@@ -146,11 +162,11 @@ static size_t SetAccessorFormat(Niflib::ComponentFormat format, tinygltf::Access
       accessor.type = TINYGLTF_TYPE_VEC4;
     return 4 * sizeof(uint8_t);
 
-    // [ todo : convert half data to float32 instead ]
+    // [ todo : convert float16 data to float32 ]
     case Niflib::F_FLOAT16_2:
     case Niflib::F_FLOAT16_4:
     default:
-    DOJIMA_LOG_QUIET( "[Warning] " << __FUNCTION__ << " : unsupported format " << format << "." );
+      DOJIMA_QUIET_LOG( "[Warning] " << __FUNCTION__ << " : unsupported format " << format << "." );
     return 0;
   };
 }
@@ -242,7 +258,7 @@ int main(int argc, char *argv[]) {
 
   // --------------
 
-  // WOTS4 has 3 data streams per Mesh :
+  // WotS4 has 3 data streams per Mesh :
   //    * USAGE_VERTEX_INDEX  : (INDEX)
   //    * USAGE_VERTEX        : (Texcoord, Position, Normal, Binormal, Tangent, BlendIndice, BlendWeight)
   //    * USAGE_USER          : (BONE_PALETTE)
@@ -258,7 +274,6 @@ int main(int argc, char *argv[]) {
   // 3) For each mesh's submeshes we create :
   //    * 1 accessors for indices.
   //    * 7 accessors for vertices.
-  //    * 7 attributes for vertices.
   //
   // [ better approach ] use one buffer per LODs.
   //
@@ -280,13 +295,13 @@ int main(int argc, char *argv[]) {
   }
 
   // Create the base Index & Vertex buffers object.
-  std::vector< tinygltf::Buffer > Buffers(static_cast<size_t>(BufferType::kCount));
+  std::vector< tinygltf::Buffer > Buffers(static_cast<size_t>(BufferId::kCount));
   
-  auto &IndexBuffer = Buffers[(int)BufferType::INDEX];
+  auto &IndexBuffer = Buffers[(int)BufferId::INDEX];
   IndexBuffer.name = "Indices";
   IndexBuffer.data.reserve(indicesBytesize);
 
-  auto &VertexBuffer = Buffers[(int)BufferType::VERTEX];
+  auto &VertexBuffer = Buffers[(int)BufferId::VERTEX];
   VertexBuffer.name = "Vertices";
   VertexBuffer.data.reserve(verticesBytesize);
   
@@ -330,35 +345,33 @@ int main(int argc, char *argv[]) {
   // Setup Meshes.
   auto const& meshIndices = getTypeListIndices( kNiMeshKey );
   for (size_t mesh_id = 0; mesh_id < meshIndices.size(); ++mesh_id) {
-    Niflib::NiObject *obj = nifList[meshIndices[mesh_id]];
-    Niflib::NiMesh* nifMesh = (Niflib::NiMesh*)obj;
-
-    auto const& meshDatas = nifMesh->GetMeshDatas();
+    auto const nifMesh = Niflib::StaticCast<Niflib::NiMesh>(nifList[meshIndices[mesh_id]]);
     auto const primType = GetPrimitiveType(nifMesh->GetPrimitiveType());
-
     auto &mesh = Meshes.at(mesh_id);
+    
+    // Name.
     mesh.name = nifMesh->GetName();
     mapMeshNameToId[mesh.name] = mesh_id;
 
-    // primitives / submeshes.
+    // Primitives / submeshes.
     uint32_t const nsubmeshes = nifMesh->GetNumSubmeshes();
     mesh.primitives.resize(nsubmeshes);
 
     // Create a buffer_view for each used datastream.
     uint32_t numMeshdata = 0;
-    for (auto const& md : meshDatas) {
+    for (auto const& md : nifMesh->GetMeshDatas()) {
       auto const& stream = md.stream;
       auto const& usage = stream->GetUsage();
 
       // Bypass unused meshData.
       if ((usage == Niflib::USAGE_SHADER_CONSTANT) ||
           (usage == Niflib::USAGE_USER)) {
-        DOJIMA_LOG( "[Warning] A " << usage << " MeshData was not used." );
+        DOJIMA_QUIET_LOG( "[Warning] A " << usage << " MeshData was not used." );
         continue;
       }
 
-      if (++numMeshdata > static_cast<uint32_t>(BufferType::kCount)) {
-        DOJIMA_LOG( "[Warning] An exceeding amount of internal buffers has been found." );
+      if (++numMeshdata > static_cast<uint32_t>(BufferId::kCount)) {
+        DOJIMA_QUIET_LOG( "[Warning] An exceeding amount of internal buffers has been found." );
         break;
       }
 
@@ -373,7 +386,7 @@ int main(int argc, char *argv[]) {
 
       switch (usage) {
         case Niflib::USAGE_VERTEX_INDEX:
-          bufferView.buffer = (int)BufferType::INDEX;
+          bufferView.buffer = (int)BufferId::INDEX;
           bufferView.byteOffset = indexBufferOffset;
           bufferView.byteStride = 0;
           bufferView.target = TINYGLTF_TARGET_ELEMENT_ARRAY_BUFFER;
@@ -383,7 +396,7 @@ int main(int argc, char *argv[]) {
         break;
 
         case Niflib::USAGE_VERTEX:
-          bufferView.buffer = (int)BufferType::VERTEX;
+          bufferView.buffer = (int)BufferId::VERTEX;
           bufferView.byteOffset = vertexBufferOffset;
           bufferView.target = TINYGLTF_TARGET_ARRAY_BUFFER;
           vertexBufferOffset += bufferView.byteLength;
@@ -424,7 +437,7 @@ int main(int argc, char *argv[]) {
           auto &acc = Accessors[prim.indices];
           size_t const byteSize = SetAccessorFormat(formats[0], acc);
 
-          acc.name = "INDEX"; //
+          if (kNameAccessors) acc.name = "INDEX";
           acc.byteOffset = region.startIndex * byteSize; //
           acc.count = region.numIndices;
           acc.normalized = false;
@@ -443,7 +456,7 @@ int main(int argc, char *argv[]) {
             auto &acc = Accessors[current_accessor++];
             size_t const byteSize = SetAccessorFormat(formats[comp_id], acc);
 
-            acc.name = sem.name; //
+            if (kNameAccessors) acc.name = sem.name;
             acc.byteOffset = vertexBaseOffset; //
             acc.count = region.numIndices;
             acc.normalized = bNormalized;
@@ -575,9 +588,20 @@ int main(int argc, char *argv[]) {
   constexpr bool bEmbedBuffers = true;
   constexpr bool bPrettyPrint = true;
   constexpr bool bWriteBinary = false;
-  
+
+  std::string const gltfFilename{
+    (kDebugOutput) ? "out.gltf" :
+    [](std::string s, std::string const& ext) -> std::string {
+      return s.replace(
+        s.begin() + s.find_last_of(".") + 1, 
+        s.end(), 
+        ext
+      ).substr(s.find_last_of(kSystemPathSeparator) + 1);
+    }(nifFilename, bWriteBinary ? "glb" :"gltf")
+  };
+
   if (tinygltf::TinyGLTF gltf; !gltf.WriteGltfSceneToFile(
-      &data, "out.gltf", bEmbedImages, bEmbedBuffers, bPrettyPrint, bWriteBinary
+      &data, gltfFilename, bEmbedImages, bEmbedBuffers, bPrettyPrint, bWriteBinary
     )) 
   {
     DOJIMA_LOG( "[Error] glTF file writing failed." );
