@@ -1,5 +1,5 @@
 # -----------------------------------------------------------------------------
-# CMake configuration file (2021 - unlicense.org)
+# CMake configuration file (2022 - unlicense.org)
 # 
 # -----------------------------------------------------------------------------
 cmake_minimum_required(VERSION 3.10.2) 
