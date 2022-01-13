@@ -179,7 +179,7 @@ static size_t SetAccessorFormat(Niflib::ComponentFormat format, tinygltf::Access
 
 int main(int argc, char *argv[]) {
   if (argc < 2) {
-    std::cerr <<"Usage : " << std::endl << argv[0] << " nif_file" << std::endl;
+    DOJIMA_LOG( "Usage : " << std::endl << argv[0] << " nif_file" );
     return EXIT_FAILURE;
   }
   std::string const nifFilename{ argv[1] };
@@ -196,9 +196,9 @@ int main(int argc, char *argv[]) {
   auto const &blockTypeIndex = nifHeader.getBlockTypeIndex();
 
   // Number of block of each type.
-  std::vector<uint32_t> blockTypeCount(blockTypes.size(), 0);
+  std::vector<size_t> blockTypeCount(blockTypes.size(), 0);
   // List of node indices from their types.
-  std::unordered_map< std::string, std::vector<uint32_t> > typeToListIndices;
+  std::unordered_map< std::string, std::vector<size_t> > typeToListIndices;
   {
     int current_index = 0;
     for (auto const bti : blockTypeIndex) {
@@ -208,13 +208,13 @@ int main(int argc, char *argv[]) {
   }
 
   // Block type name to base index.
-  std::unordered_map<std::string, uint32_t> typeToIndex;
-  for (uint32_t i = 0; i < blockTypes.size(); ++i) {
+  std::unordered_map<std::string, size_t> typeToIndex;
+  for (size_t i = 0; i < blockTypes.size(); ++i) {
     typeToIndex[blockTypes[i]] = i;
   }
 
   // Indices to differents datastreams types.
-  std::vector<uint32_t> dataStreamIndices;
+  std::vector<size_t> dataStreamIndices;
   for (auto const& [key, indices] : typeToListIndices) {
     if (key.find(kNiDataStreamKey) != std::string::npos) {
       dataStreamIndices.insert(dataStreamIndices.end(), indices.cbegin(), indices.cend());
@@ -224,16 +224,16 @@ int main(int argc, char *argv[]) {
   // --------------
 
   //  Return the number of block for a given block name.
-  auto getNumBlocks = [&](std::string const& key) -> uint32_t {
+  auto getNumBlocks = [&](std::string const& key) -> size_t {
     auto it = typeToIndex.find(key);
     auto const count = (it == typeToIndex.end()) ? 0 : blockTypeCount.at( it->second );
     return count;
   };
 
   // Return the list of node indices for a given block name.
-  auto getTypeListIndices = [&](std::string const& key) -> std::vector<uint32_t> {
+  auto getTypeListIndices = [&](std::string const& key) -> std::vector<size_t> {
     auto it = typeToListIndices.find(key);
-    return (it == typeToListIndices.end()) ? std::vector<uint32_t>() : it->second; 
+    return (it == typeToListIndices.end()) ? std::vector<size_t>() : it->second; 
   };
 
   // --------------
@@ -332,7 +332,7 @@ int main(int argc, char *argv[]) {
   std::vector< tinygltf::BufferView > BufferViews( Buffers.size() * kNiMeshCount );
 
   // Submeshes buffers.
-  size_t constexpr kNumAccessorPerSubmesh{1 + static_cast<size_t>(AttributeId::kCount)};
+  size_t constexpr kNumAccessorPerSubmesh{ 1 + static_cast<size_t>(AttributeId::kCount) };
   std::vector< tinygltf::Accessor > Accessors( totalSubmeshesCount * kNumAccessorPerSubmesh );
   std::vector< tinygltf::Material > Materials( 1 ); // TODO
 
@@ -384,7 +384,7 @@ int main(int argc, char *argv[]) {
       int const bufferViewIndex = current_buffer_view++;
       auto &bufferView = BufferViews.at(bufferViewIndex);
 
-      bufferView.byteLength = stream->GetNumBytes(); // 
+      bufferView.byteLength = stream->GetNumBytes();
       auto const& data = stream->GetData();
       auto const& formats = stream->GetComponentFormats();
 
@@ -486,40 +486,33 @@ int main(int argc, char *argv[]) {
 
   // --------------
 
-  // Setup node hierarchy.
+  // Node hierarchy.
 
-  std::vector< tinygltf::Node > Nodes;
-  
-  // Determine the total number of hierarchical subnodes.
+  // Determine the total number of hierarchical nodes.
   size_t totalNodeCount = 0;
   for (auto const& n : nifList) {
     auto ptr = Niflib::DynamicCast<Niflib::NiAVObject>(n);
     totalNodeCount += (ptr != nullptr) ? 1 : 0;
   }
-  Nodes.reserve( totalNodeCount );
 
+  std::vector< tinygltf::Node > Nodes;
+  Nodes.reserve(totalNodeCount);
 
   // Define a recursive lambda function to fill the node hierarchy.
   std::function<void(tinygltf::Node*const, Niflib::NiAVObject *const)> fillNodes;
   
   fillNodes = [&mapMeshNameToId, &Nodes, &fillNodes](tinygltf::Node *const parent, Niflib::NiAVObject *const nifAVO) -> void {
-    // Get reference to a new node.
+    // Get a reference to a new node.
     Nodes.push_back( tinygltf::Node() );
     auto &node = Nodes.back();
     
-    // Set node as its parent's children.
+    // Set it as its parent's children.
     if (parent) {
       int const nodeIndex = static_cast<int>(Nodes.size() - 1);
       parent->children.push_back(nodeIndex);
     }
 
     node.name = nifAVO->GetName();
-    // std::cerr << node.name << std::endl;
-    
-    auto pside = [](float x) -> float {
-      float const ax = std::abs(x);
-      return (ax < 0.1f) ? ax : x; 
-    };
 
     auto const& qRotation = nifAVO->GetLocalRotation().AsQuaternion();
     node.rotation = { qRotation.x, qRotation.y, qRotation.z, qRotation.w };
@@ -552,35 +545,32 @@ int main(int argc, char *argv[]) {
     }
   };
 
-  // -----------------------------
 
   /// (for Characters Pack)
   ///  The first node is a "NiIntegerExtraData" and contains the number of
   ///   "NiStringExtraData" on the upper root.
   ///
-  /// For each NiStringExtraData, if the following object has the consecutive index
-  /// it contains the path for its "part".
-  /// The following object is either a NiNode or a NiPixelData.
-  /// (determining the mesh and its texture)
+  /// Then for each NiStringExtraData, if the its following object has a consecutive index
+  /// it contains the path for a part's data, and is either a NiNode or a NiPixelData.
 
   // Detects if the NIF file is a pack.
-  unsigned int numSubParts = 0;
+  uint32_t numSubParts = 0u;
   if (auto first = Niflib::DynamicCast<Niflib::NiIntegerExtraData>(nifList[0]); first) {
-    numSubParts = first->GetData() / 2;
+    numSubParts = first->GetData() / 2u;
   }
-  if (numSubParts > 0) {
-    struct PartInfo_t {
+  if (numSubParts > 0u) {
+    struct PartIndices_t {
       int path_id = -1; // index to a NiStringExtraData containing a path.
       int data_id = -1; // index to either a NiNode or a NiPixelData.
     };
     
-    std::vector<PartInfo_t> nodeParts;
+    std::vector<PartIndices_t> nodeParts;
     nodeParts.reserve(numSubParts);
     
-    std::vector<PartInfo_t> pixelParts;
+    std::vector<PartIndices_t> pixelParts;
     pixelParts.reserve(numSubParts);
 
-    // Retrieve each part infos.    
+    // Retrieve each parts info indices.    
     for (int i = 0; i < (int)nifList.size(); ++i) {
       auto n0 = nifList[i];
       if (auto nifString = Niflib::DynamicCast<Niflib::NiStringExtraData>(n0); nifString) {
@@ -598,7 +588,8 @@ int main(int argc, char *argv[]) {
 
     // Append the node part to the nodes hierarchy.
     for (size_t i = 0; i < nodeParts.size(); ++i) {
-      auto upperNode = Niflib::DynamicCast<Niflib::NiNode>( nifList[ nodeParts[i].data_id ] );
+      auto const nodeId = nodeParts[i].data_id;
+      auto upperNode = Niflib::DynamicCast<Niflib::NiNode>(nifList[nodeId]);
       fillNodes(nullptr, upperNode);
 
       // TODO :
@@ -635,14 +626,14 @@ int main(int argc, char *argv[]) {
     
     // ----
 
-    tinygltf::Scene dummy_scene;
+    tinygltf::Scene scene;
     if constexpr(true) {
-      dummy_scene.nodes.push_back(0);
+      scene.nodes.push_back(0);
     } else {
-      dummy_scene.nodes.resize(data.nodes.size());
-      std::iota(dummy_scene.nodes.begin(), dummy_scene.nodes.end(), 0);
+      scene.nodes.resize(data.nodes.size());
+      std::iota(scene.nodes.begin(), scene.nodes.end(), 0);
     }
-    data.scenes.push_back(dummy_scene);
+    data.scenes.push_back(scene);
   }
 
   // ------
@@ -660,7 +651,7 @@ int main(int argc, char *argv[]) {
         s.end(), 
         ext
       ).substr(s.find_last_of(kSystemPathSeparator) + 1);
-    }(nifFilename, bWriteBinary ? "glb" :"gltf")
+    }(nifFilename, bWriteBinary ? "glb" : "gltf")
   };
 
   if (tinygltf::TinyGLTF gltf; !gltf.WriteGltfSceneToFile(
