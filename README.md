@@ -7,8 +7,8 @@
 
 #### Features
 
-- [x] mesh hierarchy (*Characters part & pack*),
-- [ ] float16 buffers (*Items, Maps & Weapons*),
+- [x] mesh hierarchy (*Characters*),
+- [x] float16 buffers (*Maps, Items, Accessories & Weapons*),
 - [ ] materials,
 - [ ] bones,
 - [ ] skeletal animation,
@@ -42,6 +42,7 @@ respective license. They are :
 * [tinygltf](https://github.com/syoyo/tinygltf) : library for glTF 2.0 IO.
 * [stb_image](https://github.com/nothings/stb) : image loading/decoding from file/memory.
 * [json.hpp](https://github.com/nlohmann/json) : JSON for Modern C++.
+* [half.hpp](http://half.sourceforge.net/) : Half-precision floating-point library.
 
 `ACQUIRE`'s _Way of the Samurai 4_ can be acquired from steam [here](https://store.steampowered.com/app/312780/Way_of_the_Samurai_4/).
 
