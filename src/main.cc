@@ -56,7 +56,7 @@ using half_float::half;
 // ----------------------------------------------------------------------------
 
 // Display NIF header information at loading.
-static constexpr bool kDisplayHeader = false;
+static constexpr bool kDisplayHeader = true;
 
 // Force the output filename to "out.gltf".
 static constexpr bool kDebugOutput = true;
@@ -90,7 +90,7 @@ enum class AttributeId : uint8_t {
 // NIF node keys of interest.
 std::string const kNiDataStreamKey{ "NiDataStream" };
 std::string const kNiMeshKey{ "NiMesh" };
-std::string const kNiSourceTextureKey{ "kNiSourceTextureKey" };
+std::string const kNiSourceTextureKey{ "NiSourceTexture" };
 
 // OS specific path separator.
 static constexpr char kSystemPathSeparator{
