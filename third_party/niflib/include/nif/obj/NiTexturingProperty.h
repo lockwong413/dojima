@@ -58,6 +58,15 @@ public:
 
 	//--BEGIN MISC CUSTOM CODE--//
 
+	inline NIFLIB_API bool HasBaseTexture() const { return hasBaseTexture; }
+	inline NIFLIB_API bool HasDetailTexture() const { return hasDetailTexture; }
+	inline NIFLIB_API bool HasNormalTexture() const { return hasNormalTexture; }
+
+	inline NIFLIB_API TexDesc const & GetBaseTexture() const { return baseTexture; }
+	inline NIFLIB_API TexDesc const & GetDetailTexture() const { return detailTexture; }
+	inline NIFLIB_API TexDesc const & GetNormalTexture() const { return normalTexture; }
+
+
 	/*! 
 	 * Retrieves the number of texture slots defined by this texturing propery.  Texture slots may or may not actually contain textures, but each slot has a different meaning so the way a texture is used is dependant upon which slot it is in.
 	 * \return The number of texture slots defined by this texturing property.
