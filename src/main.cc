@@ -13,17 +13,35 @@
 #include "nif/gen/Header.h"
 #include "nif/obj/NiDataStream.h"
 #include "nif/obj/NiMesh.h"
+#include "nif/obj/NiSourceTexture.h"
 #include "nif/obj/NiNode.h"
 
 #include "nif/obj/NiIntegerExtraData.h"
 #include "nif/obj/NiStringExtraData.h"
 #include "nif/obj/NiPixelData.h"
+#include "nif/obj/NiTexturingProperty.h"
 
 #define TINYGLTF_NOEXCEPTION
 #define TINYGLTF_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "tinygltf/tiny_gltf.h"
+
+#ifndef FP_FAST_FMA
+#define FP_FAST_FMA 0
+#endif
+#define HALF_ERRHANDLING_ERRNO 0
+#define HALF_ERRHANDLING_FENV 0
+#define HALF_ERRHANDLING_FLAGS 0
+#define HALF_ERRHANDLING_OVERFLOW_TO_INEXACT 0
+#define HALF_ERRHANDLING_UNDERFLOW_TO_INEXACT 0
+#define HALF_ERRHANDLING_THROWS 0
+#define HALF_ENABLE_F16C_INTRINSICS 0
+// #define HALF_ARITHMETIC_TYPE double
+// #define HALF_ROUND_STYLE 1
+#include "half/half.hpp"
+
+using half_float::half;
 
 // ----------------------------------------------------------------------------
 
@@ -45,15 +63,6 @@ static constexpr bool kDebugOutput = true;
 
 // Output name for accessors.
 static constexpr bool kNameAccessors = false;
-
-// OS specific path separator.
-static constexpr char kSystemPathSeparator{
-#if defined(WIN32) || defined(_WIN32)
-  '\\'
-#else
-  '/'
-#endif
-};
 
 // ----------------------------------------------------------------------------
 
@@ -81,61 +90,35 @@ enum class AttributeId : uint8_t {
 // NIF node keys of interest.
 std::string const kNiDataStreamKey{ "NiDataStream" };
 std::string const kNiMeshKey{ "NiMesh" };
+std::string const kNiSourceTextureKey{ "kNiSourceTextureKey" };
+
+// OS specific path separator.
+static constexpr char kSystemPathSeparator{
+#if defined(WIN32) || defined(_WIN32)
+  '\\'
+#else
+  '/'
+#endif
+};
 
 // ----------------------------------------------------------------------------
-
-static bool SetAttribute(Niflib::SemanticData cs, size_t accessorIndex, tinygltf::Primitive *prim, bool *bNormalized) {
-  std::string const name = cs.name;
-  std::string const suffix{"_" + std::to_string(cs.index)};
-
-  if ((name == "POSITION") || (name == "POSITION_BP")) {
-    prim->attributes["POSITION"] = accessorIndex;
-    *bNormalized = false;
-  } 
-  else if ((name == "NORMAL") || (name == "NORMAL_BP")) {
-    prim->attributes["NORMAL"] = accessorIndex;
-    *bNormalized = true;
-  } 
-  else if (name == "TEXCOORD") {
-    prim->attributes["TEXCOORD" + suffix] = accessorIndex;
-    // *bNormalized = true;
-  } 
-  else if (name == "BLENDINDICES") {
-    prim->attributes["JOINTS" + suffix] = accessorIndex;
-    *bNormalized = false;
-  } 
-  else if (name == "BLENDWEIGHT") {
-    prim->attributes["WEIGHTS" + suffix] = accessorIndex;
-    *bNormalized = true;
-  } 
-  else if ((name == "TANGENT") || (name == "TANGENT_BP")) {
-    prim->attributes["TANGENT"] = accessorIndex;
-    *bNormalized = true;
-  }
-  else if ((name == "BINORMAL") || (name == "BINORMAL_BP")) {
-    prim->attributes["BINORMAL"] = accessorIndex;
-    *bNormalized = true;
-  }
-  else {
-    DOJIMA_QUIET_LOG( "[Warning] " << __FUNCTION__ << " : " << name << " component not used." ); 
-    return false;
-  }
-
-  return true;
-}
 
 static uint32_t GetPrimitiveType(Niflib::MeshPrimitiveType primType) {
   switch (primType) {
     case Niflib::MESH_PRIMITIVE_TRIANGLES:
+    // DOJIMA_LOG( "Primitive : Triangles" );
     return TINYGLTF_MODE_TRIANGLES;
 
     case Niflib::MESH_PRIMITIVE_TRISTRIPS:
+    // DOJIMA_LOG( "Primitive : Triangle Strips" );
     return TINYGLTF_MODE_TRIANGLE_STRIP;
 
     case Niflib::MESH_PRIMITIVE_LINESTRIPS:
+    // DOJIMA_LOG( "Primitive : LineStrips" );
     return TINYGLTF_MODE_LINE_STRIP;
     
     case Niflib::MESH_PRIMITIVE_POINTS:
+    // DOJIMA_LOG( "Primitive : Points" );
     return TINYGLTF_MODE_POINTS;
 
     default:
@@ -144,35 +127,112 @@ static uint32_t GetPrimitiveType(Niflib::MeshPrimitiveType primType) {
   };
 }
 
-static size_t SetAccessorFormat(Niflib::ComponentFormat format, tinygltf::Accessor &accessor) {
+static bool IsHalfPrecision(Niflib::ComponentFormat format) {
+  switch(format) {
+    case Niflib::F_FLOAT16_2:
+    case Niflib::F_FLOAT16_4:
+    return true;
+
+    default:
+    return false;
+  };  
+}
+
+static size_t SetAccessorFormat(Niflib::ComponentFormat format, tinygltf::Accessor *accessor) {
+
+  // Notes :
+  // glTF 2.0 does not support half precision floating point buffer natively so we
+  // either have to define an extension / pack them as uint (lacking portability)
+  // or we can just convert the buffer as 32bit floating point (at the cost of
+  // doubling the buffer size).
+  //
+  // Here fp16 data are "wrongly" typed as fp32, while conversion checking
+  // should be perform on the VertexBuffer's BufferView side.
+  //
+  //  We set an accessor type depending on the input format but which can
+  //  not comply with glTF standard for a given accessor type, therefore it
+  // can be changed afterwards when calling SetAttribute.
+  //
+
   switch(format) {
     case Niflib::F_UINT16_1:
-      accessor.componentType = TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT;
-      accessor.type = TINYGLTF_TYPE_SCALAR;
+      accessor->componentType = TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT;
+      accessor->type = TINYGLTF_TYPE_SCALAR;
     return 1 * sizeof(uint16_t);
 
+    case Niflib::F_FLOAT16_2: //
     case Niflib::F_FLOAT32_2:
-      accessor.componentType = TINYGLTF_COMPONENT_TYPE_FLOAT;
-      accessor.type = TINYGLTF_TYPE_VEC2;
+      accessor->componentType = TINYGLTF_COMPONENT_TYPE_FLOAT;
+      accessor->type = TINYGLTF_TYPE_VEC2;
     return 2 * sizeof(float);
     
+    case Niflib::F_FLOAT16_4: //
+    case Niflib::F_FLOAT32_4:
+      accessor->componentType = TINYGLTF_COMPONENT_TYPE_FLOAT;
+      accessor->type = TINYGLTF_TYPE_VEC4;
+    return 4 * sizeof(float);
+        
     case Niflib::F_FLOAT32_3:
-      accessor.componentType = TINYGLTF_COMPONENT_TYPE_FLOAT;
-      accessor.type = TINYGLTF_TYPE_VEC3;
+      accessor->componentType = TINYGLTF_COMPONENT_TYPE_FLOAT;
+      accessor->type = TINYGLTF_TYPE_VEC3;
     return 3 * sizeof(float);
 
     case Niflib::F_UINT8_4:
-      accessor.componentType = TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE;
-      accessor.type = TINYGLTF_TYPE_VEC4;
+      accessor->componentType = TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE;
+      accessor->type = TINYGLTF_TYPE_VEC4;
     return 4 * sizeof(uint8_t);
 
-    // [ todo : convert float16 data to float32 ]
-    case Niflib::F_FLOAT16_2:
-    case Niflib::F_FLOAT16_4:
     default:
       DOJIMA_QUIET_LOG( "[Warning] " << __FUNCTION__ << " : unsupported format " << format << "." );
     return 0;
   };
+}
+
+static bool SetAttribute(Niflib::SemanticData cs, size_t accessorIndex, tinygltf::Primitive *prim, tinygltf::Accessor *accessor) {
+  std::string const& name = cs.name;
+  std::string const suffix{std::to_string(cs.index)};
+
+  if ((name == "POSITION") || (name == "POSITION_BP")) {
+    prim->attributes["POSITION"] = accessorIndex;
+    accessor->type = TINYGLTF_TYPE_VEC3;
+    accessor->normalized = false;
+  } 
+  else if ((name == "NORMAL") || (name == "NORMAL_BP")) {
+    prim->attributes["NORMAL"] = accessorIndex;
+    accessor->type = TINYGLTF_TYPE_VEC3;
+    accessor->normalized = true;
+  } 
+  else if (name == "TEXCOORD") {
+    prim->attributes["TEXCOORD_" + suffix] = accessorIndex;
+    accessor->type = TINYGLTF_TYPE_VEC2;
+    accessor->normalized = false;
+  } 
+  else if (name == "BLENDINDICES") {
+    prim->attributes["JOINTS_" + suffix] = accessorIndex;
+    accessor->type = TINYGLTF_TYPE_VEC4;
+    accessor->normalized = false;
+  } 
+  else if (name == "BLENDWEIGHT") {
+    prim->attributes["WEIGHTS_" + suffix] = accessorIndex;
+    accessor->type = TINYGLTF_TYPE_VEC4;
+    accessor->normalized = false;
+  } 
+  else if ((name == "TANGENT") || (name == "TANGENT_BP")) {
+    prim->attributes["TANGENT"] = accessorIndex;
+    accessor->type = TINYGLTF_TYPE_VEC4;
+    accessor->normalized = true;
+  }
+  // (not natively supported by glTF)
+  else if ((name == "BINORMAL") || (name == "BINORMAL_BP")) {
+    prim->attributes["BINORMAL"] = accessorIndex;
+    accessor->normalized = true;
+  }
+  else {
+    DOJIMA_QUIET_LOG( "[Warning] " << __FUNCTION__ << " : " << name << " component not used." ); 
+    return false;
+  }
+
+  return true;
 }
 
 // ----------------------------------------------------------------------------
@@ -253,11 +313,11 @@ int main(int argc, char *argv[]) {
       ++bti;
     }
 
-    std::cerr << " * Blocks type index (" << blockTypeIndex.size() << ") :" << std::endl;
-    for (auto const &bti : blockTypeIndex) {
-      std::cerr << bti << ", ";
-    }
-    std::cerr << std::endl;
+    // std::cerr << " * Blocks type index (" << blockTypeIndex.size() << ") :" << std::endl;
+    // for (auto const &bti : blockTypeIndex) {
+    //   std::cerr << bti << ", ";
+    // }
+    // std::cerr << std::endl;
   }
 
   // --------------
@@ -294,7 +354,10 @@ int main(int argc, char *argv[]) {
     if (usage == Niflib::USAGE_VERTEX_INDEX) {
       indicesBytesize += bytesize;
     } else if (usage == Niflib::USAGE_VERTEX) {
-      verticesBytesize += bytesize;
+      // Note : if the buffer contains *only* half floating point values its size
+      //        should theorically be doubled for conversion.
+      //        (as we used this info only as memory preallocation it's okay)
+      verticesBytesize += bytesize; //
     }
   }
 
@@ -307,17 +370,17 @@ int main(int argc, char *argv[]) {
 
   auto &VertexBuffer = Buffers[(int)BufferId::VERTEX];
   VertexBuffer.name = "Vertices";
-  VertexBuffer.data.reserve(verticesBytesize);
+  VertexBuffer.data.reserve(verticesBytesize); //
   
   // Offset to current buffers' end, used to build buffer viewers.
   size_t indexBufferOffset = 0;
   size_t vertexBufferOffset = 0;
 
   // Retrieve the number of NIF mesh nodes.
-  uint32_t const kNiMeshCount{ getNumBlocks(kNiMeshKey) };
+  size_t const kNiMeshCount{ getNumBlocks(kNiMeshKey) };
   
   // Calculate the total number of submeshes.
-  uint32_t totalSubmeshesCount{ 0 };
+  size_t totalSubmeshesCount{ 0 };
   {
     auto const& meshIndices = getTypeListIndices( kNiMeshKey );
     for (auto mesh_id : meshIndices) {
@@ -332,16 +395,51 @@ int main(int argc, char *argv[]) {
   std::vector< tinygltf::BufferView > BufferViews( Buffers.size() * kNiMeshCount );
 
   // Submeshes buffers.
-  size_t constexpr kNumAccessorPerSubmesh{ 1 + static_cast<size_t>(AttributeId::kCount) };
+  size_t const kNumAttributes = static_cast<size_t>(AttributeId::kCount); // (sometime less)
+  size_t constexpr kNumAccessorPerSubmesh{ 1 + kNumAttributes }; 
   std::vector< tinygltf::Accessor > Accessors( totalSubmeshesCount * kNumAccessorPerSubmesh );
-  std::vector< tinygltf::Material > Materials( 1 ); // TODO
 
+  // Materials buffer.
+  // Depends on textures, MaterialData & NiMaterialProperty (size might be reduced)  
+  std::vector< tinygltf::Material > Materials( kNiMeshCount ); //
+
+  // Textures buffers.
+  //    For packed NIF there is actually more NiPixelData than NiSourceTexture
+  //    (one more per parts) but they seem redundant and we do not load them.
+  size_t const kNumTextures{ getNumBlocks(kNiSourceTextureKey) };
+  std::vector< tinygltf::Image > Images( kNumTextures ); // (NiPixelData)
+  std::vector< tinygltf::Texture > Textures( kNumTextures ); // (NiSourceTexture)
+  std::unordered_map< std::string, size_t > mapTextureNameToIndex;
+
+  // TODO
+  // Samplers buffer.
+  std::vector< tinygltf::Sampler > Samplers( 1 );
+  // std::map< uint16_t, size_t > mapTexDescFlagToSamplerIndex;
+  // (also, check NiTextureEffect)
+  
   // Index to available buffer slot.
   size_t current_buffer_view = 0;
   size_t current_accessor = 0;
-  size_t current_material = 0;
+  size_t current_material = 0; //
+  size_t current_teximage = 0; //
 
   // --------------
+
+  // -- Meshes
+
+  // (notes on materials)
+  // WotS NiMesh have the following properties :
+  //    * NiMaterialProperty (with non PBR values),
+  //    * NiAlphaProperty
+  //    * NiSpecularProperty
+  //    * NiVertexColorProperty
+  //    * NiTexturingProperty, with 3 NiSourceTexture, each with a NiPixelData(to check with other files) :
+  //          + a Base texture (FMT_DXT3)
+  //          + a Detail Texture (FMT_DXT1)
+  //          + a Normal Texture (FMT_DXT1)
+  //
+  //  After a "part" node is defined, a NiPixelData contains another texture, supposedely
+  //  the diffuse texture for this part mesh.
 
   // Associate a mesh name to its internal id.
   std::unordered_map<std::string, size_t> mapMeshNameToId;
@@ -356,6 +454,58 @@ int main(int argc, char *argv[]) {
     // Name.
     mesh.name = nifMesh->GetName();
     mapMeshNameToId[mesh.name] = mesh_id;
+
+
+// ------------------------ WIP
+    // Material.
+    size_t const meshMaterialIndex = current_material++; //
+    tinygltf::Material &material = Materials[meshMaterialIndex];
+
+    // (we should use the SpecularGlossiness extensions)
+    // https://kcoley.github.io/glTF/extensions/2.0/Khronos/KHR_materials_pbrSpecularGlossiness/
+
+    // NiMesh properties.
+    // Material, Alpha, Specular, VertexColor. // TODO
+    
+    // WIP
+    // NiMesh properties : Image / Texture.
+    if (auto prop = nifMesh->GetPropertyByType(Niflib::NiTexturingProperty::TYPE); prop) {
+      auto texProp = Niflib::StaticCast<Niflib::NiTexturingProperty>(prop);
+   
+      if (texProp->HasBaseTexture()) {
+        auto const& texDesc = texProp->GetBaseTexture();
+
+        // retrieve sampler from texdesc flag and samplerMap.
+        // todo
+
+        // Get texture index / Check if texture already loaded.
+        // todo
+
+        auto const& srcTex = texDesc.source;
+        auto const& texFilename = srcTex->GetTextureFileName();
+        
+        if (srcTex->IsTextureExternal()) {
+          // DOJIMA_LOG( texFilename << " external" );
+        } else {
+          // DOJIMA_LOG( texFilename << " internal" );
+        }
+
+        // Handle texture transforms.
+        // todo
+
+        // Set the texture to the textureMap.
+        // todo
+      }
+
+      // if (texProp->HasDetailTexture()) {
+      //   auto const& texDesc = texProp->GetDetailTexture();
+      // }
+      // if (texProp->HasNormalTexture()) {
+      //   auto const& texDesc = texProp->GetNormalTexture();
+      // }
+    } 
+// ------------------------
+
 
     // Primitives / submeshes.
     uint32_t const nsubmeshes = nifMesh->GetNumSubmeshes();
@@ -390,30 +540,53 @@ int main(int argc, char *argv[]) {
 
       switch (usage) {
         case Niflib::USAGE_VERTEX_INDEX:
+          bufferView.target = TINYGLTF_TARGET_ELEMENT_ARRAY_BUFFER;
           bufferView.buffer = (int)BufferId::INDEX;
           bufferView.byteOffset = indexBufferOffset;
           bufferView.byteStride = 0;
-          bufferView.target = TINYGLTF_TARGET_ELEMENT_ARRAY_BUFFER;
-          indexBufferOffset += bufferView.byteLength;
-
+          
           IndexBuffer.data.insert(IndexBuffer.data.end(), data.cbegin(), data.cend());
+          indexBufferOffset += bufferView.byteLength;
         break;
 
         case Niflib::USAGE_VERTEX:
+        {
+          bufferView.target = TINYGLTF_TARGET_ARRAY_BUFFER;
           bufferView.buffer = (int)BufferId::VERTEX;
           bufferView.byteOffset = vertexBufferOffset;
-          bufferView.target = TINYGLTF_TARGET_ARRAY_BUFFER;
-          vertexBufferOffset += bufferView.byteLength;
-
-          // Calculate the interleaved attributes bytestride.
           bufferView.byteStride = 0;
-          for (int comp_id = 0; comp_id < md.numComponents; ++comp_id) {
-            tinygltf::Accessor dummy_accessor;
-            size_t const byteSize = SetAccessorFormat(formats[comp_id], dummy_accessor);
-            bufferView.byteStride += byteSize;
+          
+          // Calculate the interleaved attributes bytestride.
+          tinygltf::Accessor dummy_accessor;
+          int numHalfPrecisionBuffers = 0;
+          for (auto const format : formats) {
+            numHalfPrecisionBuffers += IsHalfPrecision(format) ? 1 : 0;
+            size_t const byteSize = SetAccessorFormat(format, &dummy_accessor);
+            bufferView.byteStride += byteSize; // [as fp32 values]
           }
 
-          VertexBuffer.data.insert(VertexBuffer.data.end(), data.cbegin(), data.cend());
+          if (numHalfPrecisionBuffers == 0) {
+            VertexBuffer.data.insert(VertexBuffer.data.end(), data.cbegin(), data.cend());
+          } else if (numHalfPrecisionBuffers == md.numComponents) {
+            // We handle half precision buffer conversion only when all the attributes
+            // in the buffer are half precision.
+
+            // Converts the half-precision floating point buffer to single precision.
+            half const* fp16_buffer = reinterpret_cast<half const*>(data.data());
+            std::vector<float> fp32_buffer(data.size() / 2);
+            for (size_t i = 0; i < fp32_buffer.size(); ++i) {
+              fp32_buffer[i] = static_cast<float>(fp16_buffer[i]);
+            }
+            auto bytes = reinterpret_cast<uint8_t const*>(fp32_buffer.data());
+            VertexBuffer.data.insert(VertexBuffer.data.end(), bytes, bytes + sizeof(float) * fp32_buffer.size());
+            
+            bufferView.byteLength *= 2;
+          } else {
+            DOJIMA_QUIET_LOG( "[Warning] Sparsed half precision buffers are unsupported ." );
+          }
+
+          vertexBufferOffset += bufferView.byteLength;
+        }
         break;
 
         default:
@@ -428,9 +601,12 @@ int main(int argc, char *argv[]) {
         auto &prim = mesh.primitives[submesh_id];
         prim.mode = primType;
 
+        // Material (same as current niMesh).
+        prim.material = meshMaterialIndex;
+
         // Creates accessors for each submeshes. 
-        uint16_t const regionMap = md.submeshToRegionMap[submesh_id];
-        auto const& region = regions[regionMap];
+        uint16_t const regionMapIndex = md.submeshToRegionMap[submesh_id];
+        auto const& region = regions[regionMapIndex];
         
         if (usage == Niflib::USAGE_VERTEX_INDEX) {
           // -- Indices
@@ -439,52 +615,51 @@ int main(int argc, char *argv[]) {
           prim.indices = current_accessor++;
           
           auto &acc = Accessors[prim.indices];
-          size_t const byteSize = SetAccessorFormat(formats[0], acc);
+          size_t const byteSize = SetAccessorFormat(formats[0], &acc);
 
           if (kNameAccessors) acc.name = "INDEX";
-          acc.byteOffset = region.startIndex * byteSize; //
-          acc.count = region.numIndices;
-          acc.normalized = false;
           acc.bufferView = bufferViewIndex;
+          acc.normalized = false;
+          acc.byteOffset = region.startIndex * byteSize;
+          acc.count = region.numIndices;
         } else {
           // -- Vertices
           
           size_t vertexBaseOffset = region.startIndex * bufferView.byteStride;
           for (int comp_id = 0; comp_id < md.numComponents; ++comp_id) {
+            auto const format = formats[comp_id];
             auto const& sem = md.componentSemantics[comp_id];
+
+            int const accessorIndex = current_accessor;
+
+            //--------------------------
+            // Set acc default params depending on format.
+            auto &acc = Accessors[current_accessor++];
+            size_t const byteSize = SetAccessorFormat(format, &acc);
             
             // Set the primitive attribute accessor.
-            bool bNormalized = false;
-            SetAttribute(sem, current_accessor, &prim, &bNormalized);
-
-            auto &acc = Accessors[current_accessor++];
-            size_t const byteSize = SetAccessorFormat(formats[comp_id], acc);
+            SetAttribute(sem, accessorIndex, &prim, &acc);
+            //--------------------------
 
             if (kNameAccessors) acc.name = sem.name;
-            acc.byteOffset = vertexBaseOffset; //
-            acc.count = region.numIndices;
-            acc.normalized = bNormalized;
             acc.bufferView = bufferViewIndex;
+            acc.byteOffset = vertexBaseOffset;
+            acc.count = region.numIndices;
 
-            vertexBaseOffset += byteSize;
+            vertexBaseOffset += byteSize; //
           }
         }
+      } // -- end submeshes --
+    } // -- end meshdatas --
 
-        // TODO : material.
-        {
-          // auto &mat = Materials.at(0);
-          prim.material = 0;
-        }
-
-      } // -- end submeshes
-    } // -- end meshdatas
-
-    // TODO : NiSkinningMeshModifier & extra properties.
+    // TODO : NiSkinningMeshModifier.
     //mesh.weights;
-    //mesh.extra;
-  }
 
-  // --------------
+    // TODO : extra datas (NiFloatExtraData, NiColorExtraData).
+    //mesh.extra;
+  } // -- end meshes --
+
+  // ---------------------------------
 
   // Node hierarchy.
 
@@ -527,12 +702,14 @@ int main(int argc, char *argv[]) {
       node.mesh = mapMeshNameToId[node.name];
     }
 
+    // TODO
     // Detect meshLOD node (nifSwitchNode).
     // if (auto nifSwitchNode = Niflib::DynamicCast<Niflib::NiSwitchNode>(nifAVO); nifSwitchNode) {}
 
+    // TODO
     // Handle extra datas.
     // auto const& listXD = nifAVO->GetExtraData();
-    // node.extras; // TODO    
+    // node.extras;  
 
     // Continue processing if the nif object is a pure node (and not only a leaf).
     if (auto nifNode = Niflib::DynamicCast<Niflib::NiNode>(nifAVO); nifNode) {
@@ -546,19 +723,29 @@ int main(int argc, char *argv[]) {
   };
 
 
-  /// (for Characters Pack)
-  ///  The first node is a "NiIntegerExtraData" and contains the number of
-  ///   "NiStringExtraData" on the upper root.
-  ///
-  /// Then for each NiStringExtraData, if the its following object has a consecutive index
-  /// it contains the path for a part's data, and is either a NiNode or a NiPixelData.
+  // (Characters Pack)
+  //
+  //  The first node is a "NiIntegerExtraData" and contains the number of
+  //   "NiStringExtraData" on the upper root.
+  //
+  // Then for each NiStringExtraData, if the following object has a consecutive index
+  // it contains the path for that part's data and is alternatively a NiNode or a NiPixelData
+  // (the NiPixelData representing only the diffuse texture).
+  //
+  // Supposedely, apart for the NiNode, the other datas are not that useful because 
+  // they're already contained in it. So for now we retrieve their index but
+  // don't do anything with it.
+  //
 
   // Detects if the NIF file is a pack.
   uint32_t numSubParts = 0u;
   if (auto first = Niflib::DynamicCast<Niflib::NiIntegerExtraData>(nifList[0]); first) {
     numSubParts = first->GetData() / 2u;
   }
+
   if (numSubParts > 0u) {
+    // -- Pack
+
     struct PartIndices_t {
       int path_id = -1; // index to a NiStringExtraData containing a path.
       int data_id = -1; // index to either a NiNode or a NiPixelData.
@@ -566,11 +753,11 @@ int main(int argc, char *argv[]) {
     
     std::vector<PartIndices_t> nodeParts;
     nodeParts.reserve(numSubParts);
-    
+
     std::vector<PartIndices_t> pixelParts;
     pixelParts.reserve(numSubParts);
 
-    // Retrieve each parts info indices.    
+    // Retrieve each part indices.    
     for (int i = 0; i < (int)nifList.size(); ++i) {
       auto n0 = nifList[i];
       if (auto nifString = Niflib::DynamicCast<Niflib::NiStringExtraData>(n0); nifString) {
@@ -592,13 +779,21 @@ int main(int argc, char *argv[]) {
       auto upperNode = Niflib::DynamicCast<Niflib::NiNode>(nifList[nodeId]);
       fillNodes(nullptr, upperNode);
 
-      // TODO :
-      //  * set mesh part path.
-      //  * set pixel data.
+      // TODO (optional) :
+      //  * set part's mesh path.
+      //  * set part's texture path.
     }
   } else if (auto upperNode = Niflib::DynamicCast<Niflib::NiNode>(nifList[0]); upperNode) {
+    // -- Part's hierarchy.
     fillNodes(nullptr, upperNode);
+  } else if (auto upperNode = Niflib::DynamicCast<Niflib::NiPixelData>(nifList[0]); upperNode) {
+    // -- Single Texture Data.
   }
+
+  // --------------
+
+  // Remove excess size (happens when meshes does not have joints attributes).
+  Accessors.resize(current_accessor);
 
   // --------------
 
@@ -614,9 +809,9 @@ int main(int argc, char *argv[]) {
     data.buffers = std::move( Buffers );
     data.nodes = std::move( Nodes );
 
-    //data.images;
-    //data.textures;
-    //data.samplers;
+    data.images = std::move( Images );
+    data.textures = std::move( Textures );
+    data.samplers = std::move( Samplers );
 
     //data.skins;
     //data.animations;
