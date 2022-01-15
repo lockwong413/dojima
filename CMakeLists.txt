@@ -220,7 +220,6 @@ if(USE_GCC OR USE_CLANG)
 
   # Features.
   list(APPEND CXX_FLAGS
-    -fdiagnostics-color
     -fno-strict-aliasing 
     -fno-builtin-memcmp
     -fno-common
@@ -230,6 +229,13 @@ if(USE_GCC OR USE_CLANG)
     # -ftree-loop-distribution
     # -funroll-loops
   )
+  
+  # Force ANSI colored outputs.
+  if(USE_GCC)
+    add_compile_options(-fdiagnostics-color=always)
+  elseif (USE_CLANG)
+    add_compile_options(-fcolor-diagnostics)
+  endif()
 
   if(NOT OPT_ENABLE_RTTI)
     list(APPEND CXX_FLAGS -fno-rtti)
