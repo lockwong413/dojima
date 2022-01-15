@@ -327,10 +327,10 @@ int main(int argc, char *argv[]) {
   //    * USAGE_VERTEX        : (Texcoord, Position, Normal, Binormal, Tangent, BlendIndice, BlendWeight)
   //    * USAGE_USER          : (BONE_PALETTE)
   //
-  //  Process :
+  //  Mesh processing :
   //
-  // 1) We create 2 buffers for indices and vertices. 
-  //       (we don't use BONE_PALETTE for now)
+  // 1) We create 2 buffers for indices and vertices (we don't use BONE_PALETTE for now).
+  //     [ better approach : use one buffer per LODs ]
   //
   // 2) For each NiMesh we create :
   //    * 2 buffer_views for indices and vertices (one per used datastreams).
@@ -339,8 +339,7 @@ int main(int argc, char *argv[]) {
   //    * 1 accessors for indices.
   //    * 7 accessors for vertices.
   //
-  // [ better approach ] use one buffer per LODs.
-  //
+
   auto nifList = Niflib::ReadNifList(nifFilename);
 
   // Determine the bytesize of the global Index & Vertex buffers.
@@ -354,12 +353,16 @@ int main(int argc, char *argv[]) {
     if (usage == Niflib::USAGE_VERTEX_INDEX) {
       indicesBytesize += bytesize;
     } else if (usage == Niflib::USAGE_VERTEX) {
-      // Note : if the buffer contains *only* half floating point values its size
-      //        should theorically be doubled for conversion.
-      //        (as we used this info only as memory preallocation it's okay)
       verticesBytesize += bytesize; //
     }
   }
+
+  // Note : 
+  //  When the buffer contains *only* half floating point values its size
+  //  should theorically be doubled for conversion.
+  //  We use this only as preallocation so either way that'll be ok, but as for 
+  //  WotS4 the biggest files are float16 maps we always allocate enough.
+  verticesBytesize *= 2;
 
   // Create the base Index & Vertex buffers object.
   std::vector< tinygltf::Buffer > Buffers(static_cast<size_t>(BufferId::kCount));
@@ -370,7 +373,7 @@ int main(int argc, char *argv[]) {
 
   auto &VertexBuffer = Buffers[(int)BufferId::VERTEX];
   VertexBuffer.name = "Vertices";
-  VertexBuffer.data.reserve(verticesBytesize); //
+  VertexBuffer.data.reserve(verticesBytesize);
   
   // Offset to current buffers' end, used to build buffer viewers.
   size_t indexBufferOffset = 0;
@@ -395,18 +398,19 @@ int main(int argc, char *argv[]) {
   std::vector< tinygltf::BufferView > BufferViews( Buffers.size() * kNiMeshCount );
 
   // Submeshes buffers.
-  size_t const kNumAttributes = static_cast<size_t>(AttributeId::kCount); // (sometime less)
+  size_t const kNumAttributes = static_cast<size_t>(AttributeId::kCount); // (might be lower)
   size_t constexpr kNumAccessorPerSubmesh{ 1 + kNumAttributes }; 
   std::vector< tinygltf::Accessor > Accessors( totalSubmeshesCount * kNumAccessorPerSubmesh );
 
   // Materials buffer.
-  // Depends on textures, MaterialData & NiMaterialProperty (size might be reduced)  
-  std::vector< tinygltf::Material > Materials( kNiMeshCount ); //
+  // Depends on textures, MaterialData & NiMaterialProperty. 
+  std::vector< tinygltf::Material > Materials( kNiMeshCount ); // (might be lower)
 
+  // TODO
   // Textures buffers.
   //    For packed NIF there is actually more NiPixelData than NiSourceTexture
-  //    (one more per parts) but they seem redundant and we do not load them.
-  size_t const kNumTextures{ getNumBlocks(kNiSourceTextureKey) };
+  //    (one more per parts) but they seem redundant and we do not load them for the moment.
+  size_t const kNumTextures{ getNumBlocks(kNiSourceTextureKey) }; //
   std::vector< tinygltf::Image > Images( kNumTextures ); // (NiPixelData)
   std::vector< tinygltf::Texture > Textures( kNumTextures ); // (NiSourceTexture)
   std::unordered_map< std::string, size_t > mapTextureNameToIndex;
@@ -427,8 +431,8 @@ int main(int argc, char *argv[]) {
 
   // -- Meshes
 
-  // (notes on materials)
-  // WotS NiMesh have the following properties :
+  // Notes on materials :
+  //  WotS NiMesh have the following properties :
   //    * NiMaterialProperty (with non PBR values),
   //    * NiAlphaProperty
   //    * NiSpecularProperty
@@ -438,8 +442,8 @@ int main(int argc, char *argv[]) {
   //          + a Detail Texture (FMT_DXT1)
   //          + a Normal Texture (FMT_DXT1)
   //
-  //  After a "part" node is defined, a NiPixelData contains another texture, supposedely
-  //  the diffuse texture for this part mesh.
+  //  After a "part" node is defined, a NiPixelData contains another texture,
+  //  supposedely the diffuse texture for this part mesh.
 
   // Associate a mesh name to its internal id.
   std::unordered_map<std::string, size_t> mapMeshNameToId;
@@ -568,8 +572,8 @@ int main(int argc, char *argv[]) {
           if (numHalfPrecisionBuffers == 0) {
             VertexBuffer.data.insert(VertexBuffer.data.end(), data.cbegin(), data.cend());
           } else if (numHalfPrecisionBuffers == md.numComponents) {
-            // We handle half precision buffer conversion only when all the attributes
-            // in the buffer are half precision.
+            // (We handle half precision buffer conversion only when all the attributes
+            // in the buffer are half-precision)
 
             // Converts the half-precision floating point buffer to single precision.
             half const* fp16_buffer = reinterpret_cast<half const*>(data.data());
@@ -582,7 +586,7 @@ int main(int argc, char *argv[]) {
             
             bufferView.byteLength *= 2;
           } else {
-            DOJIMA_QUIET_LOG( "[Warning] Sparsed half precision buffers are unsupported ." );
+            DOJIMA_QUIET_LOG( "[Warning] Sparsed half precision buffers are not supported ." );
           }
 
           vertexBufferOffset += bufferView.byteLength;
@@ -809,9 +813,10 @@ int main(int argc, char *argv[]) {
     data.buffers = std::move( Buffers );
     data.nodes = std::move( Nodes );
 
-    data.images = std::move( Images );
-    data.textures = std::move( Textures );
-    data.samplers = std::move( Samplers );
+    // TODO
+    // data.images = std::move( Images );
+    // data.textures = std::move( Textures );
+    // data.samplers = std::move( Samplers );
 
     //data.skins;
     //data.animations;
