@@ -31,7 +31,7 @@ struct OblivionSubShape {
 	 * bit sets the SCALED property in Oblivion. The next five bits make up the number
 	 * of this part in a linked body list.
 	 */
-	byte colFilter;
+	ubyte_t colFilter;
 	/*! Unknown. Perhaps the vertex wielding type? */
 	unsigned short unknownShort;
 	/*! The number of vertices that form this sub shape. */

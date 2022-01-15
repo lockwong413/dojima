@@ -20,7 +20,7 @@ using namespace Niflib;
 //Definition of TYPE constant
 const Type NiPSMeshParticleSystem::TYPE("NiPSMeshParticleSystem", &NiPSParticleSystem::TYPE );
 
-NiPSMeshParticleSystem::NiPSMeshParticleSystem() : unknown23((int)0), unknown24((int)0), unknown25((int)0), unknown26((byte)0) {
+NiPSMeshParticleSystem::NiPSMeshParticleSystem() : unknown23((int)0), unknown24((int)0), unknown25((int)0), unknown26((ubyte_t)0) {
 	//--BEGIN CONSTRUCTOR CUSTOM CODE--//
 
 	//--END CUSTOM CODE--//

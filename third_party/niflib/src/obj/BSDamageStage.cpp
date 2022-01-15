@@ -20,7 +20,7 @@ using namespace Niflib;
 //Definition of TYPE constant
 const Type BSDamageStage::TYPE("BSDamageStage", &NiNode::TYPE );
 
-BSDamageStage::BSDamageStage() : unknownByte1((byte)0), unknownShort2((short)0) {
+BSDamageStage::BSDamageStage() : unknownByte1((ubyte_t)0), unknownShort2((short)0) {
 	//--BEGIN CONSTRUCTOR CUSTOM CODE--//
 
 	//--END CUSTOM CODE--//

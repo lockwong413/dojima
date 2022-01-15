@@ -60,7 +60,7 @@ protected:
 	/*! Name of the hkx file. */
 	IndexString behaviourGraphFile;
 	/*! Unknown, has to do with blending appended bones onto an actor. */
-	byte controlsBaseSkeleton;
+	ubyte_t controlsBaseSkeleton;
 public:
 	/*! NIFLIB_HIDDEN function.  For internal use only. */
 	NIFLIB_HIDDEN virtual void Read( istream& in, list<unsigned int> & link_stack, const NifInfo & info );

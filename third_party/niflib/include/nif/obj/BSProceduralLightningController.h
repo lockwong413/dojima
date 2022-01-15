@@ -99,11 +99,11 @@ protected:
 	/*! Unknown */
 	float float5;
 	/*! Unknown */
-	byte byte1;
+	ubyte_t byte1;
 	/*! Unknown */
-	byte byte2;
+	ubyte_t byte2;
 	/*! Unknown */
-	byte byte3;
+	ubyte_t byte3;
 	/*! Unknown, unsure if this is actually another interpolator link. */
 	Ref<NiInterpolator > interpolator10_;
 public:

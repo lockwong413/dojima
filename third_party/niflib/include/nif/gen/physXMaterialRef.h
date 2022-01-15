@@ -28,9 +28,9 @@ struct physXMaterialRef {
 	/*! Copy Operator */
 	NIFLIB_API physXMaterialRef & operator=( const physXMaterialRef & src );
 	/*! Unknown */
-	byte number;
+	ubyte_t number;
 	/*! Unknown */
-	byte unknownByte1;
+	ubyte_t unknownByte1;
 	/*! PhysX Material Description */
 	Ref<NiPhysXMaterialDesc > materialDesc;
 	//--BEGIN MISC CUSTOM CODE--//

@@ -36,7 +36,7 @@ struct AdditionalDataBlock {
 	/*! Unknown */
 	vector<int > dataSizes;
 	/*! Unknown */
-	vector< vector<byte > > data;
+	vector< vector<ubyte_t > > data;
 	//--BEGIN MISC CUSTOM CODE--//
 	//--END CUSTOM CODE--//
 };

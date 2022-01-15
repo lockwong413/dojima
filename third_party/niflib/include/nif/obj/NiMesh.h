@@ -111,7 +111,7 @@ protected:
 	/*! Unknown. */
 	vector<Ref<NiMeshModifier > > modifiers;
 	/*! Unknown. */
-	byte unknown100;
+	ubyte_t unknown100;
 	/*! Unknown. */
 	int unknown101;
 	/*! Size of additional data. */
@@ -133,7 +133,7 @@ protected:
 	/*! Unknown. */
 	mutable int unknown302;
 	/*! Unknown. */
-	vector<byte > unknown303;
+	vector<ubyte_t > unknown303;
 	/*! Unknown. */
 	mutable int unknown350;
 	/*! Unknown. */

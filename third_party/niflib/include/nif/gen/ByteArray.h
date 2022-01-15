@@ -26,7 +26,7 @@ struct ByteArray {
 	/*! The number of bytes in this array */
 	mutable unsigned int dataSize;
 	/*! The bytes which make up the array */
-	vector<byte > data;
+	vector<ubyte_t > data;
 	//--BEGIN MISC CUSTOM CODE--//
 	//--END CUSTOM CODE--//
 };

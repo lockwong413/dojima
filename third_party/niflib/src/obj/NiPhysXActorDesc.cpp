@@ -23,7 +23,7 @@ using namespace Niflib;
 //Definition of TYPE constant
 const Type NiPhysXActorDesc::TYPE("NiPhysXActorDesc", &NiObject::TYPE );
 
-NiPhysXActorDesc::NiPhysXActorDesc() : unknownInt1((int)0), unknownInt2((int)0), unknownRef0(NULL), unknownInt4(0.0f), unknownInt5((int)0), unknownByte1((byte)0), unknownByte2((byte)0), unknownInt6((int)0), shapeDescription(NULL), unknownRef1(NULL), unknownRef2(NULL) {
+NiPhysXActorDesc::NiPhysXActorDesc() : unknownInt1((int)0), unknownInt2((int)0), unknownRef0(NULL), unknownInt4(0.0f), unknownInt5((int)0), unknownByte1((ubyte_t)0), unknownByte2((ubyte_t)0), unknownInt6((int)0), shapeDescription(NULL), unknownRef1(NULL), unknownRef2(NULL) {
 	//--BEGIN CONSTRUCTOR CUSTOM CODE--//
 
 	//--END CUSTOM CODE--//

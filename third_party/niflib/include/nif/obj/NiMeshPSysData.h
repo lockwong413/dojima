@@ -63,7 +63,7 @@ protected:
 	/*! Unknown. Possible vertex count but probably not. */
 	unsigned int unknownInt2;
 	/*! Unknown. 0? */
-	byte unknownByte3;
+	ubyte_t unknownByte3;
 	/*! Unknown. */
 	mutable unsigned int numUnknownInts1;
 	/*! Unknown integers */

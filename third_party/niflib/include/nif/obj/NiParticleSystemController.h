@@ -92,8 +92,8 @@ protected:
 	float emitStartTime;
 	/*! Particle emit stop time */
 	float emitStopTime;
-	/*! Unknown byte, (=0) */
-	byte unknownByte;
+	/*! Unknown ubyte_t, (=0) */
+	ubyte_t unknownByte;
 	/*! Particle emission rate in old files */
 	unsigned int oldEmitRate;
 	/*! Particle emission rate (particles per second) */
@@ -153,8 +153,8 @@ protected:
 	Ref<NiParticleModifier > particleExtra;
 	/*! Unknown int (=0xffffffff) */
 	Ref<NiObject > unknownLink2;
-	/*! Trailing null byte */
-	byte trailer;
+	/*! Trailing null ubyte_t */
+	ubyte_t trailer;
 	/*! Unknown. */
 	Ref<NiColorData > colorData;
 	/*! Unknown. */

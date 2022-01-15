@@ -45,7 +45,7 @@ struct AdditionalDataInfo {
 	 */
 	int channelOffset;
 	/*! Unknown, usually equal to 2. */
-	byte unknownByte1;
+	ubyte_t unknownByte1;
 	//--BEGIN MISC CUSTOM CODE--//
 	//--END CUSTOM CODE--//
 };

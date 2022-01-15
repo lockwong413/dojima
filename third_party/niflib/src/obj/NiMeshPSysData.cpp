@@ -20,7 +20,7 @@ using namespace Niflib;
 //Definition of TYPE constant
 const Type NiMeshPSysData::TYPE("NiMeshPSysData", &NiPSysData::TYPE );
 
-NiMeshPSysData::NiMeshPSysData() : unknownInt2((unsigned int)0), unknownByte3((byte)0), numUnknownInts1((unsigned int)0), unknownNode(NULL) {
+NiMeshPSysData::NiMeshPSysData() : unknownInt2((unsigned int)0), unknownByte3((ubyte_t)0), numUnknownInts1((unsigned int)0), unknownNode(NULL) {
 	//--BEGIN CONSTRUCTOR CUSTOM CODE--//
 	//--END CUSTOM CODE--//
 }

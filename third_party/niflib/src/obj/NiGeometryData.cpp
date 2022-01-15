@@ -21,7 +21,7 @@ using namespace Niflib;
 //Definition of TYPE constant
 const Type NiGeometryData::TYPE("NiGeometryData", &NiObject::TYPE );
 
-NiGeometryData::NiGeometryData() : unknownInt((int)0), numVertices((unsigned short)0), bsMaxVertices((unsigned short)0), keepFlags((byte)0), compressFlags((byte)0), hasVertices(1), numUvSets((unsigned short)0), bsNumUvSets((unsigned short)0), skyrimMaterial((SkyrimHavokMaterial)0), hasNormals(false), radius(0.0f), hasVertexColors(false), hasUv(false), consistencyFlags((ConsistencyType)CT_MUTABLE), additionalData(NULL) {
+NiGeometryData::NiGeometryData() : unknownInt((int)0), numVertices((unsigned short)0), bsMaxVertices((unsigned short)0), keepFlags((ubyte_t)0), compressFlags((ubyte_t)0), hasVertices(1), numUvSets((unsigned short)0), bsNumUvSets((unsigned short)0), skyrimMaterial((SkyrimHavokMaterial)0), hasNormals(false), radius(0.0f), hasVertexColors(false), hasUv(false), consistencyFlags((ConsistencyType)CT_MUTABLE), additionalData(NULL) {
 	//--BEGIN CONSTRUCTOR CUSTOM CODE--//
 	//--END CUSTOM CODE--//
 }
@@ -684,11 +684,11 @@ void NiGeometryData::SetBound(Vector3 const & center, float radius)
 }
 
 
-byte NiGeometryData::GetTspaceFlag() const {
+ubyte_t NiGeometryData::GetTspaceFlag() const {
    return (numUvSets | bsNumUvSets) >> 8;
 }
 
-void NiGeometryData::SetTspaceFlag( byte value ) {
+void NiGeometryData::SetTspaceFlag( ubyte_t value ) {
    numUvSets = ((value << 8) | numUvSets);
    bsNumUvSets = ((value << 8) | bsNumUvSets);
 }

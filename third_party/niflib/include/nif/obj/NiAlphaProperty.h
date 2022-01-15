@@ -146,13 +146,13 @@ public:
 	 * Used to get the current threshold value that will be used with the alpha test function to determine whether a particular pixel will be drawn.
 	 * \return The current alpha test threshold.
 	 */
-	NIFLIB_API byte GetTestThreshold() const;
+	NIFLIB_API ubyte_t GetTestThreshold() const;
 
 	/*!
 	 * Used to set the threshold value that will be used with the alpha test function to determine whether a particular pixel will be drawn.
 	 * \param[in] n The new alpha test threshold.
 	 */
-	NIFLIB_API void SetTestThreshold( byte n );
+	NIFLIB_API void SetTestThreshold( ubyte_t n );
 
 	/*!
 	 * Used to get the current triangle sort mode.  If triangle sorting is enabled, the triangles that make up an object will be sorted based on distance, and drawn from farthest away to closest.  This reduces errors when using alpha blending.
@@ -213,7 +213,7 @@ protected:
 	 */
 	unsigned short flags;
 	/*! Threshold for alpha testing (see: glAlphaFunc) */
-	byte threshold;
+	ubyte_t threshold;
 	/*! Unknown */
 	unsigned short unknownShort1;
 	/*! Unknown */

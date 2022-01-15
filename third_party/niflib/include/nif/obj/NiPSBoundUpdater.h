@@ -58,9 +58,9 @@ public:
 	//--END CUSTOM CODE--//
 protected:
 	/*! Unknown. */
-	byte unknown1;
+	ubyte_t unknown1;
 	/*! Unknown. */
-	byte unknown2;
+	ubyte_t unknown2;
 public:
 	/*! NIFLIB_HIDDEN function.  For internal use only. */
 	NIFLIB_HIDDEN virtual void Read( istream& in, list<unsigned int> & link_stack, const NifInfo & info );

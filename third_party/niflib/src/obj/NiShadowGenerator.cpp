@@ -22,7 +22,7 @@ using namespace Niflib;
 //Definition of TYPE constant
 const Type NiShadowGenerator::TYPE("NiShadowGenerator", &NiObject::TYPE );
 
-NiShadowGenerator::NiShadowGenerator() : unknownFlags((unsigned short)0), numUnknownLinks1((unsigned int)0), unkownInt2((int)0), target(NULL), unkownFloat4(0.98f), unkownByte5((byte)0), unkownInt6((int)2), unkownInt7((int)0), unkownInt8((int)0), unkownByte9((byte)0) {
+NiShadowGenerator::NiShadowGenerator() : unknownFlags((unsigned short)0), numUnknownLinks1((unsigned int)0), unkownInt2((int)0), target(NULL), unkownFloat4(0.98f), unkownByte5((ubyte_t)0), unkownInt6((int)2), unkownInt7((int)0), unkownInt8((int)0), unkownByte9((ubyte_t)0) {
 	//--BEGIN CONSTRUCTOR CUSTOM CODE--//
 
 	//--END CUSTOM CODE--//

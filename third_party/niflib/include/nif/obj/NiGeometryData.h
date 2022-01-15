@@ -219,13 +219,13 @@ public:
 	// \param[in] value The new value.
 	NIFLIB_API void SetConsistencyFlags( const ConsistencyType & value );
 
-   // Methods for saving bitangents and tangents saved in upper byte.
+   // Methods for saving bitangents and tangents saved in upper ubyte_t.
    // \return The current value.
-   NIFLIB_API byte GetTspaceFlag() const;
+   NIFLIB_API ubyte_t GetTspaceFlag() const;
 
-   // Methods for saving bitangents and tangents saved in upper byte.
+   // Methods for saving bitangents and tangents saved in upper ubyte_t.
    // \param[in] value The new value.
-   NIFLIB_API void SetTspaceFlag( byte value );
+   NIFLIB_API void SetTspaceFlag( ubyte_t value );
 
    // Do we have lighting normals? These are essential for proper lighting: if not
    // present, the model will only be influenced by ambient light.
@@ -270,14 +270,14 @@ protected:
 	/*! Bethesda uses this for max number of particles in NiPSysData. */
 	unsigned short bsMaxVertices;
 	/*! Used with NiCollision objects when OBB or TRI is set. */
-	byte keepFlags;
+	ubyte_t keepFlags;
 	/*! Unknown. */
-	byte compressFlags;
+	ubyte_t compressFlags;
 	/*! Is the vertex array present? (Always non-zero.) */
 	bool hasVertices;
 	/*! The mesh vertices. */
 	vector<Vector3 > vertices;
-	/*! Flag for tangents and bitangents in upper byte. Texture flags in lower byte. */
+	/*! Flag for tangents and bitangents in upper ubyte_t. Texture flags in lower ubyte_t. */
 	mutable unsigned short numUvSets;
 	/*!
 	 * Bethesda's version of this field for nif versions 20.2.0.7 and up. Only a single

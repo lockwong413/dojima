@@ -80,7 +80,7 @@ protected:
 	/*! Friction. */
 	float friction;
 	/*! Unknown. Do not set this to anything over 0 as it will crash the game. */
-	byte unknownByte1;
+	ubyte_t unknownByte1;
 public:
 	/*! NIFLIB_HIDDEN function.  For internal use only. */
 	NIFLIB_HIDDEN virtual void Read( istream& in, list<unsigned int> & link_stack, const NifInfo & info );

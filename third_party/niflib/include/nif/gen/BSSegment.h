@@ -28,7 +28,7 @@ struct BSSegment {
 	/*! Geometry present in the segment */
 	BSSegmentFlags flags;
 	/*! Unknown */
-	byte unknownByte1;
+	ubyte_t unknownByte1;
 	//--BEGIN MISC CUSTOM CODE--//
 
 	//--END CUSTOM CODE--//

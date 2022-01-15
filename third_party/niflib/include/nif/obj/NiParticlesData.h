@@ -82,7 +82,7 @@ protected:
 	/*! The individual particle rotations. */
 	vector<Quaternion > rotations;
 	/*! Unknown, probably a boolean. */
-	byte unknownByte1;
+	ubyte_t unknownByte1;
 	/*! Unknown */
 	Ref<NiObject > unknownLink;
 	/*! Are the angles of rotation present? */
@@ -99,11 +99,11 @@ protected:
 	 * 2,4,8,16,32,64 are potential values. If "Has" was no then this should be 256,
 	 * which represents a 16x16 framed image, which is invalid
 	 */
-	mutable byte numUvQuadrants;
+	mutable ubyte_t numUvQuadrants;
 	/*! Unknown. */
 	vector<Vector4 > uvQuadrants;
 	/*! Unknown */
-	byte unknownByte2;
+	ubyte_t unknownByte2;
 public:
 	/*! NIFLIB_HIDDEN function.  For internal use only. */
 	NIFLIB_HIDDEN virtual void Read( istream& in, list<unsigned int> & link_stack, const NifInfo & info );

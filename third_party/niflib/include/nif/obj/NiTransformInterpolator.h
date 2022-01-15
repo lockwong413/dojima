@@ -128,7 +128,7 @@ protected:
 	/*! Scale. */
 	float scale;
 	/*! Unknown. */
-	Niflib::array<3,byte > unknownBytes;
+	Niflib::array<3,ubyte_t > unknownBytes;
 	/*! Refers to NiTransformData. */
 	Ref<NiTransformData > data;
 public:

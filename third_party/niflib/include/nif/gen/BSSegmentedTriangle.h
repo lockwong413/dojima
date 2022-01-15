@@ -28,7 +28,7 @@ struct BSSegmentedTriangle {
 	/*! Unknown */
 	int unknownInt2;
 	/*! Unknown */
-	byte unknownByte1;
+	ubyte_t unknownByte1;
 	//--BEGIN MISC CUSTOM CODE--//
 	//--END CUSTOM CODE--//
 };

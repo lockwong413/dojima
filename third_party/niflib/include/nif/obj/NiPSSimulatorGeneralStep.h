@@ -63,7 +63,7 @@ public:
 	//--END CUSTOM CODE--//
 protected:
 	/*! The number of size animation keys. */
-	mutable byte numSizeKeys;
+	mutable ubyte_t numSizeKeys;
 	/*! The particle size keys. */
 	vector<Key<float > > sizeKeys;
 	/*! The loop behavior for the size keys. */
@@ -75,13 +75,13 @@ protected:
 	/*! Unknown. */
 	float unknown3;
 	/*! The number of color animation keys. */
-	mutable byte numColorKeys;
+	mutable ubyte_t numColorKeys;
 	/*! The particle color keys. */
 	vector<Key<ByteColor4 > > colorKeys;
 	/*! The loop behavior for the color keys. */
 	PSLoopBehavior colorLoopBehavior;
 	/*! The number of rotatoin animation keys. */
-	mutable byte numRotationKeys;
+	mutable ubyte_t numRotationKeys;
 	/*! The particle rotation keys. */
 	vector<Key<Quaternion > > rotationKeys;
 	/*! The loop behavior for the rotation keys. */

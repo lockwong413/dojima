@@ -31,12 +31,12 @@ struct FurniturePosition {
 	 * Refers to a furnituremarkerxx.nif file. Always seems to be the same as Position
 	 * Ref 2.
 	 */
-	byte positionRef1;
+	ubyte_t positionRef1;
 	/*!
 	 * Refers to a furnituremarkerxx.nif file. Always seems to be the same as Position
 	 * Ref 1.
 	 */
-	byte positionRef2;
+	ubyte_t positionRef2;
 	/*! Similar to Orientation, in float form. */
 	float heading;
 	/*! Unknown */

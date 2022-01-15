@@ -112,7 +112,7 @@ public:
 	 * \param[in] priority Used only in Oblivion to set the priority of one controller over another when the two are merged.
 	 * \sa NiControllerSequence::ClearChildren, NiControllerSequence::AddController
 	 */
-	NIFLIB_API void AddInterpolator( NiSingleInterpController * obj, byte priority = 0 );
+	NIFLIB_API void AddInterpolator( NiSingleInterpController * obj, ubyte_t priority = 0 );
 
 	/*!
 	 * Attaches an interpolator to this KF file for a KF file of version greater than 10.2.0.0.  Versions below this use controllers.
@@ -121,7 +121,7 @@ public:
 	 * \param[in] include_string_pallete Indicates if the resulting ControllerLinks will hold reference to the NiStringPallete in the NiControllerSequence
 	 * \sa NiControllerSequence::ClearChildren, NiControllerSequence::AddController
 	 */
-	NIFLIB_API void AddInterpolator( NiSingleInterpController * obj, byte priority , bool include_string_pallete );
+	NIFLIB_API void AddInterpolator( NiSingleInterpController * obj, ubyte_t priority , bool include_string_pallete );
 
 	/*!
 	 * Attaches a generic interpolator to this KF file for a KF file of version greater than 10.2.0.0.  Versions below this use controllers.
@@ -132,7 +132,7 @@ public:
 	 * \param[in] include_string_pallete Indicates if the resulting ControllerLinks will hold reference to the NiStringPallete in the NiControllerSequence
 	 * \sa NiControllerSequence::ClearChildren, NiControllerSequence::AddController
 	 */
-	NIFLIB_API void AddGenericInterpolator( NiInterpolator * interpolator, NiObjectNET* target, string controller_type_name, byte priority = 0, bool include_string_pallete  = true);
+	NIFLIB_API void AddGenericInterpolator( NiInterpolator * interpolator, NiObjectNET* target, string controller_type_name, ubyte_t priority = 0, bool include_string_pallete  = true);
 
 	/*! 
 	 * Removes all controllers and interpolators from this Kf file root object.
@@ -294,7 +294,7 @@ protected:
 	/*! The controller sequence stop time? */
 	float stopTime;
 	/*! Unknown. */
-	byte unknownByte;
+	ubyte_t unknownByte;
 	/*! Refers to NiControllerManager which references this object, if any. */
 	NiControllerManager * manager;
 	/*! Name of target node Controller acts on. */

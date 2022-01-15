@@ -167,7 +167,7 @@ protected:
 	/*! Property flags. */
 	unsigned short flags;
 	/*! Enables or disables the stencil test. */
-	byte stencilEnabled;
+	ubyte_t stencilEnabled;
 	/*! Selects the compare mode function (see: glStencilFunc). */
 	StencilCompareMode stencilFunction;
 	/*! Unknown.  Default is 0. */

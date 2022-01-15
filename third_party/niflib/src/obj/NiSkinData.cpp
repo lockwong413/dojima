@@ -28,7 +28,7 @@ using namespace Niflib;
 //Definition of TYPE constant
 const Type NiSkinData::TYPE("NiSkinData", &NiObject::TYPE );
 
-NiSkinData::NiSkinData() : numBones((unsigned int)0), skinPartition(NULL), hasVertexWeights((byte)1) {
+NiSkinData::NiSkinData() : numBones((unsigned int)0), skinPartition(NULL), hasVertexWeights((ubyte_t)1) {
 	//--BEGIN CONSTRUCTOR CUSTOM CODE--//
 	//--END CUSTOM CODE--//
 }

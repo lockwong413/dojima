@@ -27,7 +27,7 @@ using namespace Niflib;
 //Definition of TYPE constant
 const Type NiMesh::TYPE("NiMesh", &NiRenderObject::TYPE );
 
-NiMesh::NiMesh() : primitiveType((MeshPrimitiveType)0), unknown51((int)0), unknown52((int)0), unknown53((int)0), unknown54((int)0), unknown55(0.0f), unknown56((int)0), numSubmeshes((unsigned short)0), instancingEnabled(false), numDatas((unsigned int)0), numModifiers((unsigned int)0), unknown100((byte)0), unknown101((int)0), unknown102((unsigned int)0), unknown200((int)0), unknown250((int)0), unknown300((int)0), unknown301((short)0), unknown302((int)0), unknown350((int)0), unknown400((int)0) {
+NiMesh::NiMesh() : primitiveType((MeshPrimitiveType)0), unknown51((int)0), unknown52((int)0), unknown53((int)0), unknown54((int)0), unknown55(0.0f), unknown56((int)0), numSubmeshes((unsigned short)0), instancingEnabled(false), numDatas((unsigned int)0), numModifiers((unsigned int)0), unknown100((ubyte_t)0), unknown101((int)0), unknown102((unsigned int)0), unknown200((int)0), unknown250((int)0), unknown300((int)0), unknown301((short)0), unknown302((int)0), unknown350((int)0), unknown400((int)0) {
 	//--BEGIN CONSTRUCTOR CUSTOM CODE--//
 
 	//--END CUSTOM CODE--//

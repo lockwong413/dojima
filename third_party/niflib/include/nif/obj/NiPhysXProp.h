@@ -75,7 +75,7 @@ protected:
 	/*! Unknown */
 	vector<Ref<NiPhysXTransformDest > > transformDests;
 	/*! Unknown */
-	byte unknownByte;
+	ubyte_t unknownByte;
 	/*! Unknown */
 	int unknownInt;
 	/*! PhysX Property Description. */

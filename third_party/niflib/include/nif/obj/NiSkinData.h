@@ -151,7 +151,7 @@ protected:
 	/*! This optionally links a NiSkinPartition for hardware-acceleration information. */
 	Ref<NiSkinPartition > skinPartition;
 	/*! Enables Vertex Weights for this NiSkinData. */
-	byte hasVertexWeights;
+	ubyte_t hasVertexWeights;
 	/*! Contains offset data for each node that this skin is influenced by. */
 	vector<SkinData > boneList;
 public:

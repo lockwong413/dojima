@@ -9,7 +9,7 @@ All rights reserved.  Please see niflib.h for license. */
 using namespace Niflib;
 
 //Constructor
-BSSegmentedTriangle::BSSegmentedTriangle() : unknownInt1((int)0), unknownInt2((int)0), unknownByte1((byte)0) {};
+BSSegmentedTriangle::BSSegmentedTriangle() : unknownInt1((int)0), unknownInt2((int)0), unknownByte1((ubyte_t)0) {};
 
 //Copy Constructor
 BSSegmentedTriangle::BSSegmentedTriangle( const BSSegmentedTriangle & src ) {

@@ -60,9 +60,9 @@ public:
 	//--END CUSTOM CODE--//
 protected:
 	/*! Unknown. =1? */
-	byte unknownByte1;
+	ubyte_t unknownByte1;
 	/*! Unknown. =0 */
-	byte unknownByte2;
+	ubyte_t unknownByte2;
 	/*! Affected node? */
 	NiNode * node;
 public:

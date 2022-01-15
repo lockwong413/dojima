@@ -19,7 +19,7 @@ using namespace Niflib;
 //Definition of TYPE constant
 const Type NiParticleRotation::TYPE("NiParticleRotation", &NiParticleModifier::TYPE );
 
-NiParticleRotation::NiParticleRotation() : randomInitialAxis_((byte)0), rotationSpeed_(0.0f) {
+NiParticleRotation::NiParticleRotation() : randomInitialAxis_((ubyte_t)0), rotationSpeed_(0.0f) {
 	//--BEGIN CONSTRUCTOR CUSTOM CODE--//
 	//--END CUSTOM CODE--//
 }

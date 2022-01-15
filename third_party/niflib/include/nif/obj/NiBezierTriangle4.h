@@ -70,7 +70,7 @@ protected:
 	/*! unknown */
 	Niflib::array<4,short > unknown3;
 	/*! unknown */
-	byte unknown4;
+	ubyte_t unknown4;
 	/*! unknown */
 	unsigned int unknown5;
 	/*! unknown */

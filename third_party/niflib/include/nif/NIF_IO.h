@@ -29,7 +29,7 @@ int ReadInt( istream& in );
 unsigned int ReadUInt( istream& in );
 unsigned short ReadUShort( istream& in );
 short ReadShort( istream& in );
-byte ReadByte( istream& in );
+ubyte_t ReadByte( istream& in );
 float ReadFloat( istream &in );
 string ReadString( istream &in );
 bool ReadBool( istream &in, unsigned int version );
@@ -40,7 +40,7 @@ void WriteUInt( unsigned int val, ostream& out );
 void WritePtr32( void * val, ostream& out );
 void WriteUShort( unsigned short val, ostream& out );
 void WriteShort( short val, ostream& out );
-void WriteByte( byte val, ostream& out );
+void WriteByte( ubyte_t val, ostream& out );
 void WriteFloat( float val, ostream& out );
 void WriteString( string const & val, ostream& out );
 void WriteBool( bool val, ostream& out, unsigned int version );
@@ -115,9 +115,9 @@ void NifStream( unsigned short const & val, ostream& out, const NifInfo & info )
 void NifStream( short & val, istream& in, const NifInfo & info);
 void NifStream( short const & val, ostream& out, const NifInfo & info);
 
-//byte
-void NifStream( byte & val, istream& in, const NifInfo & info);
-void NifStream( byte const & val, ostream& out, const NifInfo & info);
+//ubyte_t
+void NifStream( ubyte_t & val, istream& in, const NifInfo & info);
+void NifStream( ubyte_t const & val, ostream& out, const NifInfo & info);
 
 //bool
 void NifStream( bool & val, istream& in, const NifInfo & info);  // version is significant
@@ -290,10 +290,10 @@ template <> void NifStream( Key<IndexString> const & key, ostream& file, const N
 
 //The HexString function creates a formatted hex display of the given data for use in printing
 //a debug string for information that is not understood
-string HexString( const byte * src, unsigned int len );
+string HexString( const ubyte_t * src, unsigned int len );
 
 //Byte
-ostream & operator<<( ostream & out, byte const & val );
+ostream & operator<<( ostream & out, ubyte_t const & val );
 
 // strInfo
 struct NifInfo;

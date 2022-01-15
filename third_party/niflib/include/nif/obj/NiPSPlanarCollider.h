@@ -71,7 +71,7 @@ protected:
 	/*! Unknown. */
 	short unknownShort3;
 	/*! Unknown. */
-	byte unknownByte4;
+	ubyte_t unknownByte4;
 	/*! Unknown. */
 	Niflib::array<8,float > unknownFloats5;
 	/*! Unknown. */

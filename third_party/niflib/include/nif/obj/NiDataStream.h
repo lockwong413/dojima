@@ -71,7 +71,7 @@ public:
 	NIFLIB_API unsigned int GetNumComponents() const { return numComponents; }
 	NIFLIB_API const std::vector<ComponentFormat> & GetComponentFormats() const { return componentFormats; }
 
-	NIFLIB_API const std::vector<byte>& GetData() const { return data; }
+	NIFLIB_API const std::vector<ubyte_t>& GetData() const { return data; }
 
 	//--END CUSTOM CODE--//
 protected:
@@ -95,7 +95,7 @@ protected:
 	/*! The format of each component in this data stream. */
 	vector<ComponentFormat> componentFormats;
 	/*! Unknown. */
-	vector<byte> data;
+	vector<ubyte_t> data;
 	/*! Unknown. */
 	bool streamable;
 public:

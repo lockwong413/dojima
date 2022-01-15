@@ -87,7 +87,7 @@ protected:
 	/*! Unknown */
 	unsigned int unknownInt5;
 	/*! Unknown */
-	byte unknownByte6;
+	ubyte_t unknownByte6;
 public:
 	/*! NIFLIB_HIDDEN function.  For internal use only. */
 	NIFLIB_HIDDEN virtual void Read( istream& in, list<unsigned int> & link_stack, const NifInfo & info );

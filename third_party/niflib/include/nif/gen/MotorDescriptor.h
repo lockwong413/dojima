@@ -36,7 +36,7 @@ struct MotorDescriptor {
 	/*! Unknown */
 	float unknownFloat6;
 	/*! Unknown */
-	byte unknownByte1;
+	ubyte_t unknownByte1;
 	//--BEGIN MISC CUSTOM CODE--//
 
 	//--END CUSTOM CODE--//

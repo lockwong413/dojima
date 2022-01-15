@@ -20,7 +20,7 @@ using namespace Niflib;
 //Definition of TYPE constant
 const Type NiPSSimulatorGeneralStep::TYPE("NiPSSimulatorGeneralStep", &NiPSSimulatorStep::TYPE );
 
-NiPSSimulatorGeneralStep::NiPSSimulatorGeneralStep() : numSizeKeys((byte)0), sizeLoopBehavior((PSLoopBehavior)0), unknown1(0.0f), unknown2(0.0f), unknown3(0.0f), numColorKeys((byte)0), colorLoopBehavior((PSLoopBehavior)0), numRotationKeys((byte)0), rotationLoopBehavior((PSLoopBehavior)0), growTime(0.0f), shrinkTime(0.0f), growGeneration((unsigned short)0), shrinkGeneration((unsigned short)0) {
+NiPSSimulatorGeneralStep::NiPSSimulatorGeneralStep() : numSizeKeys((ubyte_t)0), sizeLoopBehavior((PSLoopBehavior)0), unknown1(0.0f), unknown2(0.0f), unknown3(0.0f), numColorKeys((ubyte_t)0), colorLoopBehavior((PSLoopBehavior)0), numRotationKeys((ubyte_t)0), rotationLoopBehavior((PSLoopBehavior)0), growTime(0.0f), shrinkTime(0.0f), growGeneration((unsigned short)0), shrinkGeneration((unsigned short)0) {
 	//--BEGIN CONSTRUCTOR CUSTOM CODE--//
 
 	//--END CUSTOM CODE--//
@@ -89,9 +89,9 @@ void NiPSSimulatorGeneralStep::Write( ostream& out, const map<NiObjectRef,unsign
 	//--END CUSTOM CODE--//
 
 	NiPSSimulatorStep::Write( out, link_map, missing_link_stack, info );
-	numRotationKeys = (byte)(rotationKeys.size());
-	numColorKeys = (byte)(colorKeys.size());
-	numSizeKeys = (byte)(sizeKeys.size());
+	numRotationKeys = (ubyte_t)(rotationKeys.size());
+	numColorKeys = (ubyte_t)(colorKeys.size());
+	numSizeKeys = (ubyte_t)(sizeKeys.size());
 	NifStream( numSizeKeys, out, info );
 	for (unsigned int i1 = 0; i1 < sizeKeys.size(); i1++) {
 		NifStream( sizeKeys[i1], out, info, 1 );
@@ -134,9 +134,9 @@ std::string NiPSSimulatorGeneralStep::asString( bool verbose ) const {
 	stringstream out;
 	unsigned int array_output_count = 0;
 	out << NiPSSimulatorStep::asString();
-	numRotationKeys = (byte)(rotationKeys.size());
-	numColorKeys = (byte)(colorKeys.size());
-	numSizeKeys = (byte)(sizeKeys.size());
+	numRotationKeys = (ubyte_t)(rotationKeys.size());
+	numColorKeys = (ubyte_t)(colorKeys.size());
+	numSizeKeys = (ubyte_t)(sizeKeys.size());
 	out << "  Num Size Keys:  " << numSizeKeys << endl;
 	array_output_count = 0;
 	for (unsigned int i1 = 0; i1 < sizeKeys.size(); i1++) {

@@ -20,7 +20,7 @@ using namespace Niflib;
 //Definition of TYPE constant
 const Type bhkWorldObject::TYPE("bhkWorldObject", &bhkSerializable::TYPE );
 
-bhkWorldObject::bhkWorldObject() : shape(NULL), layer((OblivionLayer)OL_STATIC), skyrimLayer((SkyrimLayer)SKYL_STATIC), colFilter((byte)0), flagsAndPartNumber((byte) 0), unknownShort((unsigned short)0) {
+bhkWorldObject::bhkWorldObject() : shape(NULL), layer((OblivionLayer)OL_STATIC), skyrimLayer((SkyrimLayer)SKYL_STATIC), colFilter((ubyte_t)0), flagsAndPartNumber((ubyte_t) 0), unknownShort((unsigned short)0) {
 	//--BEGIN CONSTRUCTOR CUSTOM CODE--//
 	//--END CUSTOM CODE--//
 }

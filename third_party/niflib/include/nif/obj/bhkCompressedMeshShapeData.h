@@ -290,7 +290,7 @@ protected:
 	 */
 	Vector4 boundsMax;
 	/*! Unknown */
-	byte unknownByte1;
+	ubyte_t unknownByte1;
 	/*! Unknown */
 	unsigned int unknownInt3;
 	/*! Unknown */
@@ -298,7 +298,7 @@ protected:
 	/*! Unknown */
 	unsigned int unknownInt5;
 	/*! Unknown */
-	byte unknownByte2;
+	ubyte_t unknownByte2;
 	/*! Number of chunk materials */
 	mutable unsigned int numMaterials;
 	/*! Table (array) with sets of materials. Chunks refers to this table by index. */

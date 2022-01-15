@@ -143,7 +143,7 @@ protected:
 	/*! Number of vertices. */
 	mutable unsigned int numVertices;
 	/*! Unknown. */
-	byte unknownByte1;
+	ubyte_t unknownByte1;
 	/*! The vertices? */
 	vector<Vector3 > vertices;
 	/*! Number of subparts. */

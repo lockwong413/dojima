@@ -60,7 +60,7 @@ protected:
 	/*! Unknown */
 	short unknownShort5;
 	/*! Unknown */
-	byte unknownByte6;
+	ubyte_t unknownByte6;
 	/*! Unknown */
 	int unknownInt7;
 	/*! Unknown */

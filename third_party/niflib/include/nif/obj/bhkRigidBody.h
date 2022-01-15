@@ -345,7 +345,7 @@ protected:
 	/*! The collision response. See hkResponseType for hkpWorld default implementations. */
 	hkResponseType collisionResponse_;
 	/*! Unknown */
-	byte unknownByte;
+	ubyte_t unknownByte;
 	/*!
 	 * Lowers the frequency for processContactCallbacks. A value of 5 means that a
 	 * callback is raised every 5th frame.
@@ -356,11 +356,11 @@ protected:
 	/*! Copy of Layer value? */
 	OblivionLayer layerCopy;
 	/*! Copy of Col Filter value? */
-	byte colFilterCopy;
+	ubyte_t colFilterCopy;
 	/*! Copy of Layer value? */
 	SkyrimLayer skyrimLayerCopy;
 	/*! Copy of  value? */
-	byte flagsAndPartNumberCopy;
+	ubyte_t flagsAndPartNumberCopy;
 	/*!
 	 * Unknown.
 	 *             Oblivion defaults: 0 21280 2481 62977 65535 44 0

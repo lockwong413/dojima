@@ -20,7 +20,7 @@ using namespace Niflib;
 //Definition of TYPE constant
 const Type BSBehaviorGraphExtraData::TYPE("BSBehaviorGraphExtraData", &NiExtraData::TYPE );
 
-BSBehaviorGraphExtraData::BSBehaviorGraphExtraData() : controlsBaseSkeleton((byte)0) {
+BSBehaviorGraphExtraData::BSBehaviorGraphExtraData() : controlsBaseSkeleton((ubyte_t)0) {
 	//--BEGIN CONSTRUCTOR CUSTOM CODE--//
 
 	//--END CUSTOM CODE--//

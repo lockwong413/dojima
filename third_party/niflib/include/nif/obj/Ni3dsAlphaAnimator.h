@@ -63,7 +63,7 @@ public:
 	//--END CUSTOM CODE--//
 protected:
 	/*! Unknown. */
-	Niflib::array<40,byte > unknown1;
+	Niflib::array<40,ubyte_t > unknown1;
 	/*! The parent? */
 	Ref<NiObject > parent;
 	/*! Unknown. */

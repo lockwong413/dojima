@@ -13,7 +13,7 @@ All rights reserved.  Please see niflib.h for license. */
 using namespace Niflib;
 
 //Constructor
-ControllerLink::ControllerLink() : controller(NULL), interpolator(NULL), unknownLink2(NULL), unknownShort0((unsigned short)0), priority((byte)0), stringPalette(NULL), nodeNameOffset((unsigned int)-1), propertyTypeOffset((unsigned int)-1), controllerTypeOffset((unsigned int)-1), variable1Offset((unsigned int)-1), variable2Offset((unsigned int)-1) {};
+ControllerLink::ControllerLink() : controller(NULL), interpolator(NULL), unknownLink2(NULL), unknownShort0((unsigned short)0), priority((ubyte_t)0), stringPalette(NULL), nodeNameOffset((unsigned int)-1), propertyTypeOffset((unsigned int)-1), controllerTypeOffset((unsigned int)-1), variable1Offset((unsigned int)-1), variable2Offset((unsigned int)-1) {};
 
 //Copy Constructor
 ControllerLink::ControllerLink( const ControllerLink & src ) {

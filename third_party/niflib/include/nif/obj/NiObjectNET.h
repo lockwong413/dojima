@@ -157,7 +157,7 @@ protected:
 	/*! Extra string data. */
 	IndexString oldExtraString;
 	/*! Always 0. */
-	byte unknownByte;
+	ubyte_t unknownByte;
 	/*! Extra data object index. (The first in a chain) */
 	Ref<NiExtraData > extraData;
 	/*! The number of Extra Data objects referenced through the list. */

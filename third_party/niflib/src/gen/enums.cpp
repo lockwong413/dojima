@@ -66,13 +66,13 @@ ostream & operator<<( ostream & out, CollisionMode const & val ) {
 //--DeactivatorType--//
 
 void NifStream( DeactivatorType & val, istream& in, const NifInfo & info ) {
-	byte temp;
+	ubyte_t temp;
 	NifStream( temp, in, info );
 	val = DeactivatorType(temp);
 }
 
 void NifStream( DeactivatorType const & val, ostream& out, const NifInfo & info ) {
-	NifStream( (byte)(val), out, info );
+	NifStream( (ubyte_t)(val), out, info );
 }
 
 ostream & operator<<( ostream & out, DeactivatorType const & val ) {
@@ -88,13 +88,13 @@ ostream & operator<<( ostream & out, DeactivatorType const & val ) {
 //--hkResponseType--//
 
 void NifStream( hkResponseType & val, istream& in, const NifInfo & info ) {
-	byte temp;
+	ubyte_t temp;
 	NifStream( temp, in, info );
 	val = hkResponseType(temp);
 }
 
 void NifStream( hkResponseType const & val, ostream& out, const NifInfo & info ) {
-	NifStream( (byte)(val), out, info );
+	NifStream( (ubyte_t)(val), out, info );
 }
 
 ostream & operator<<( ostream & out, hkResponseType const & val ) {
@@ -186,13 +186,13 @@ ostream & operator<<( ostream & out, HavokMaterial const & val ) {
 //--EndianType--//
 
 void NifStream( EndianType & val, istream& in, const NifInfo & info ) {
-	byte temp;
+	ubyte_t temp;
 	NifStream( temp, in, info );
 	val = EndianType(temp);
 }
 
 void NifStream( EndianType const & val, ostream& out, const NifInfo & info ) {
-	NifStream( (byte)(val), out, info );
+	NifStream( (ubyte_t)(val), out, info );
 }
 
 ostream & operator<<( ostream & out, EndianType const & val ) {
@@ -636,13 +636,13 @@ ostream & operator<<( ostream & out, SkyObjectType const & val ) {
 //--OblivionLayer--//
 
 void NifStream( OblivionLayer & val, istream& in, const NifInfo & info ) {
-	byte temp;
+	ubyte_t temp;
 	NifStream( temp, in, info );
 	val = OblivionLayer(temp);
 }
 
 void NifStream( OblivionLayer const & val, ostream& out, const NifInfo & info ) {
-	NifStream( (byte)(val), out, info );
+	NifStream( (ubyte_t)(val), out, info );
 }
 
 ostream & operator<<( ostream & out, OblivionLayer const & val ) {
@@ -713,13 +713,13 @@ ostream & operator<<( ostream & out, OblivionLayer const & val ) {
 //--SkyrimLayer--//
 
 void NifStream( SkyrimLayer & val, istream& in, const NifInfo & info ) {
-	byte temp;
+	ubyte_t temp;
 	NifStream( temp, in, info );
 	val = SkyrimLayer(temp);
 }
 
 void NifStream( SkyrimLayer const & val, ostream& out, const NifInfo & info ) {
-	NifStream( (byte)(val), out, info );
+	NifStream( (ubyte_t)(val), out, info );
 }
 
 ostream & operator<<( ostream & out, SkyrimLayer const & val ) {
@@ -804,13 +804,13 @@ ostream & operator<<( ostream & out, PSLoopBehavior const & val ) {
 //--SolverDeactivation--//
 
 void NifStream( SolverDeactivation & val, istream& in, const NifInfo & info ) {
-	byte temp;
+	ubyte_t temp;
 	NifStream( temp, in, info );
 	val = SolverDeactivation(temp);
 }
 
 void NifStream( SolverDeactivation const & val, ostream& out, const NifInfo & info ) {
-	NifStream( (byte)(val), out, info );
+	NifStream( (ubyte_t)(val), out, info );
 }
 
 ostream & operator<<( ostream & out, SolverDeactivation const & val ) {
@@ -1089,13 +1089,13 @@ ostream & operator<<( ostream & out, ApplyMode const & val ) {
 //--MotionSystem--//
 
 void NifStream( MotionSystem & val, istream& in, const NifInfo & info ) {
-	byte temp;
+	ubyte_t temp;
 	NifStream( temp, in, info );
 	val = MotionSystem(temp);
 }
 
 void NifStream( MotionSystem const & val, ostream& out, const NifInfo & info ) {
-	NifStream( (byte)(val), out, info );
+	NifStream( (ubyte_t)(val), out, info );
 }
 
 ostream & operator<<( ostream & out, MotionSystem const & val ) {
@@ -1463,13 +1463,13 @@ ostream & operator<<( ostream & out, ComponentFormat const & val ) {
 //--MotionQuality--//
 
 void NifStream( MotionQuality & val, istream& in, const NifInfo & info ) {
-	byte temp;
+	ubyte_t temp;
 	NifStream( temp, in, info );
 	val = MotionQuality(temp);
 }
 
 void NifStream( MotionQuality const & val, ostream& out, const NifInfo & info ) {
-	NifStream( (byte)(val), out, info );
+	NifStream( (ubyte_t)(val), out, info );
 }
 
 ostream & operator<<( ostream & out, MotionQuality const & val ) {
@@ -1690,13 +1690,13 @@ ostream & operator<<( ostream & out, EmitFrom const & val ) {
 //--SkyrimWaterShaderFlags--//
 
 void NifStream( SkyrimWaterShaderFlags & val, istream& in, const NifInfo & info ) {
-	byte temp;
+	ubyte_t temp;
 	NifStream( temp, in, info );
 	val = SkyrimWaterShaderFlags(temp);
 }
 
 void NifStream( SkyrimWaterShaderFlags const & val, ostream& out, const NifInfo & info ) {
-	NifStream( (byte)(val), out, info );
+	NifStream( (ubyte_t)(val), out, info );
 }
 
 ostream & operator<<( ostream & out, SkyrimWaterShaderFlags const & val ) {
@@ -1991,13 +1991,13 @@ ostream & operator<<( ostream & out, BSSegmentFlags const & val ) {
 //--MoppDataBuildType--//
 
 void NifStream( MoppDataBuildType & val, istream& in, const NifInfo & info ) {
-	byte temp;
+	ubyte_t temp;
 	NifStream( temp, in, info );
 	val = MoppDataBuildType(temp);
 }
 
 void NifStream( MoppDataBuildType const & val, ostream& out, const NifInfo & info ) {
-	NifStream( (byte)(val), out, info );
+	NifStream( (ubyte_t)(val), out, info );
 }
 
 ostream & operator<<( ostream & out, MoppDataBuildType const & val ) {
@@ -2005,7 +2005,7 @@ ostream & operator<<( ostream & out, MoppDataBuildType const & val ) {
 		case BUILT_WITH_CHUNK_SUBDIVISION: return out << "BUILT_WITH_CHUNK_SUBDIVISION";
 		case BUILT_WITHOUT_CHUNK_SUBDIVISION: return out << "BUILT_WITHOUT_CHUNK_SUBDIVISION";
 		case BUILD_NOT_SET: return out << "BUILD_NOT_SET";
-		default: return out << "Invalid Value! - " << (byte)(val);
+		default: return out << "Invalid Value! - " << (ubyte_t)(val);
 	}
 }
 

@@ -64,13 +64,13 @@ protected:
 	/*! Unknown */
 	short unknownShort2;
 	/*! NXS */
-	Niflib::array<3,byte > unknownBytes0;
+	Niflib::array<3,ubyte_t > unknownBytes0;
 	/*! Unknown */
-	byte unknownByte1;
+	ubyte_t unknownByte1;
 	/*! MESH */
-	Niflib::array<4,byte > unknownBytes1;
+	Niflib::array<4,ubyte_t > unknownBytes1;
 	/*! Unknown */
-	Niflib::array<8,byte > unknownBytes2;
+	Niflib::array<8,ubyte_t > unknownBytes2;
 	/*! Unknown */
 	float unknownFloat2;
 	/*! Unknown */
@@ -84,13 +84,13 @@ protected:
 	/*! Vertices */
 	vector<Vector3 > vertices;
 	/*! Unknown */
-	Niflib::array<982,byte > unknownBytes3;
+	Niflib::array<982,ubyte_t > unknownBytes3;
 	/*! Unknown */
 	Niflib::array<368,short > unknownShorts1;
 	/*! Unknown */
 	Niflib::array<3328,unsigned int > unknownInts1;
 	/*! Unknown */
-	byte unknownByte2;
+	ubyte_t unknownByte2;
 public:
 	/*! NIFLIB_HIDDEN function.  For internal use only. */
 	NIFLIB_HIDDEN virtual void Read( istream& in, list<unsigned int> & link_stack, const NifInfo & info );

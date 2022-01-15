@@ -23,7 +23,7 @@ using namespace Niflib;
 //Definition of TYPE constant
 const Type NiPhysXProp::TYPE("NiPhysXProp", &NiObjectNET::TYPE );
 
-NiPhysXProp::NiPhysXProp() : unknownFloat1(0.0f), unknownInt1((unsigned int)0), numDests((int)0), unknownByte((byte)0), unknownInt((int)0), propDescription(NULL) {
+NiPhysXProp::NiPhysXProp() : unknownFloat1(0.0f), unknownInt1((unsigned int)0), numDests((int)0), unknownByte((ubyte_t)0), unknownInt((int)0), propDescription(NULL) {
 	//--BEGIN CONSTRUCTOR CUSTOM CODE--//
 
 	//--END CUSTOM CODE--//

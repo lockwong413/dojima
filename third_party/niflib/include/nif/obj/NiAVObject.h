@@ -286,7 +286,7 @@ protected:
 	/*! Always 2,0,2,0. */
 	Niflib::array<4,unsigned int > unknown1;
 	/*! 0 or 1. */
-	byte unknown2;
+	ubyte_t unknown2;
 	/*! Do we have a bounding box? */
 	bool hasBoundingBox;
 	/*! The bounding box. */

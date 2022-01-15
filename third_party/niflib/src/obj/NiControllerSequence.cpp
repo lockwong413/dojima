@@ -27,7 +27,7 @@ using namespace Niflib;
 //Definition of TYPE constant
 const Type NiControllerSequence::TYPE("NiControllerSequence", &NiSequence::TYPE );
 
-NiControllerSequence::NiControllerSequence() : weight(1.0f), textKeys(NULL), cycleType((CycleType)0), unknownInt0((unsigned int)0), frequency(0.0f), startTime(0.0f), unknownFloat2(0.0f), stopTime(0.0f), unknownByte((byte)0), manager(NULL), stringPalette(NULL), animNotes(NULL), unknownShort1((short)0), unknownInt3((unsigned int)64) {
+NiControllerSequence::NiControllerSequence() : weight(1.0f), textKeys(NULL), cycleType((CycleType)0), unknownInt0((unsigned int)0), frequency(0.0f), startTime(0.0f), unknownFloat2(0.0f), stopTime(0.0f), unknownByte((ubyte_t)0), manager(NULL), stringPalette(NULL), animNotes(NULL), unknownShort1((short)0), unknownInt3((unsigned int)64) {
 	//--BEGIN CONSTRUCTOR CUSTOM CODE--//
 	//--END CUSTOM CODE--//
 }
@@ -336,7 +336,7 @@ void NiControllerSequence::AddController( string const & targetName, NiTimeContr
 	controlledBlocks.push_back( cl );
 }
 
-void NiControllerSequence::AddInterpolator( NiSingleInterpController * obj, byte priority ) {
+void NiControllerSequence::AddInterpolator( NiSingleInterpController * obj, ubyte_t priority ) {
 	//Make sure the link isn't null
 	if ( obj == NULL ) {
 		throw runtime_error("Attempted to add a null controller to NiControllerSequence block.");
@@ -378,7 +378,7 @@ void NiControllerSequence::AddInterpolator( NiSingleInterpController * obj, byte
 }
 
 
-void NiControllerSequence::AddInterpolator( NiSingleInterpController * obj, byte priority , bool include_string_pallete ) {
+void NiControllerSequence::AddInterpolator( NiSingleInterpController * obj, ubyte_t priority , bool include_string_pallete ) {
 	//Make sure the link isn't null
 	if ( obj == NULL ) {
 		throw runtime_error("Attempted to add a null controller to NiControllerSequence block.");
@@ -433,7 +433,7 @@ void NiControllerSequence::AddInterpolator( NiSingleInterpController * obj, byte
 }
 
 
-void NiControllerSequence::AddGenericInterpolator( NiInterpolator * interpolator, NiObjectNET* target, string controller_type_name, byte priority /*= 0*/, bool include_string_pallete /*= true*/ ) {
+void NiControllerSequence::AddGenericInterpolator( NiInterpolator * interpolator, NiObjectNET* target, string controller_type_name, ubyte_t priority /*= 0*/, bool include_string_pallete /*= true*/ ) {
 	//Make sure the parameters aren't null
 
 	if(interpolator == NULL) {

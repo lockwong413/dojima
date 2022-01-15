@@ -105,7 +105,7 @@ protected:
 	/*! Unknown */
 	int unknown21;
 	/*! Unknown */
-	Niflib::array<4,byte > unknown22;
+	Niflib::array<4,ubyte_t > unknown22;
 	/*! Unknown. */
 	int unknown27;
 	/*! Unknown. */
@@ -123,7 +123,7 @@ protected:
 	/*! Unknown. */
 	int unknown34;
 	/*! Unknown. */
-	byte unknown35;
+	ubyte_t unknown35;
 	/*! -1? */
 	int unknown36;
 	/*! Unknown. */

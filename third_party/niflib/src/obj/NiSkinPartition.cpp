@@ -602,7 +602,7 @@ void NiSkinPartition::EnableVertexBoneIndices( int partition, bool enable) {
    SkinPartition& part = skinPartitionBlocks.at(partition);
    if (enable) {
       // Allocate appropriately sized vectors. Clearing existing data.
-      vector<byte> bones(part.numWeightsPerVertex);
+      vector<ubyte_t> bones(part.numWeightsPerVertex);
       part.boneIndices.assign(part.numVertices, bones);
    } else {
       part.boneIndices.clear();
@@ -611,7 +611,7 @@ void NiSkinPartition::EnableVertexBoneIndices( int partition, bool enable) {
 }
 
 vector<unsigned short> NiSkinPartition::GetVertexBoneIndices( int partition, int vertex ) const {
-   const vector<byte>& bones = skinPartitionBlocks.at(partition).boneIndices[vertex];
+   const vector<ubyte_t>& bones = skinPartitionBlocks.at(partition).boneIndices[vertex];
    vector<unsigned short> value;
    size_t n = bones.size();
    value.resize(bones.size());
@@ -621,11 +621,11 @@ vector<unsigned short> NiSkinPartition::GetVertexBoneIndices( int partition, int
 }
 
 void NiSkinPartition::SetVertexBoneIndices( int partition, int vertex, const vector<unsigned short>& boneList ) {
-   vector<byte>& bones = skinPartitionBlocks.at(partition).boneIndices[vertex];
+   vector<ubyte_t>& bones = skinPartitionBlocks.at(partition).boneIndices[vertex];
    size_t n = boneList.size();
    bones.resize(n);
    for (size_t i=0; i<n; ++i)
-      bones[i] = byte(boneList[i]);
+      bones[i] = ubyte_t(boneList[i]);
 }
 
 unsigned short NiSkinPartition::GetStripCount( int partition ) const {

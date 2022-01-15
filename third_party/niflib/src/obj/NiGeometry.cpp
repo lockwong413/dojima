@@ -25,7 +25,7 @@ using namespace Niflib;
 //Definition of TYPE constant
 const Type NiGeometry::TYPE("NiGeometry", &NiAVObject::TYPE );
 
-NiGeometry::NiGeometry() : data(NULL), skinInstance(NULL), numMaterials((unsigned int)0), activeMaterial((int)0), hasShader(false), unknownInteger((int)0), unknownByte((byte)255), unknownInteger2((int)0), dirtyFlag(false) {
+NiGeometry::NiGeometry() : data(NULL), skinInstance(NULL), numMaterials((unsigned int)0), activeMaterial((int)0), hasShader(false), unknownInteger((int)0), unknownByte((ubyte_t)255), unknownInteger2((int)0), dirtyFlag(false) {
 	//--BEGIN CONSTRUCTOR CUSTOM CODE--//
 	//--END CUSTOM CODE--//
 }

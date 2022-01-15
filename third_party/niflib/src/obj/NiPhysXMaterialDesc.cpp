@@ -20,7 +20,7 @@ using namespace Niflib;
 //Definition of TYPE constant
 const Type NiPhysXMaterialDesc::TYPE("NiPhysXMaterialDesc", &NiObject::TYPE );
 
-NiPhysXMaterialDesc::NiPhysXMaterialDesc() : unknownByte1((byte)0), unknownByte2((byte)0) {
+NiPhysXMaterialDesc::NiPhysXMaterialDesc() : unknownByte1((ubyte_t)0), unknownByte2((ubyte_t)0) {
 	//--BEGIN CONSTRUCTOR CUSTOM CODE--//
 
 	//--END CUSTOM CODE--//

@@ -20,7 +20,7 @@ using namespace Niflib;
 //Definition of TYPE constant
 const Type NiPSSphericalCollider::TYPE("NiPSSphericalCollider", &NiObject::TYPE );
 
-NiPSSphericalCollider::NiPSSphericalCollider() : unknown1((int)0), unknown2((int)0), unknown3((byte)0), unknown4(0.0f), unknown5((int)0), unknown6((short)0), unknown7((int)0) {
+NiPSSphericalCollider::NiPSSphericalCollider() : unknown1((int)0), unknown2((int)0), unknown3((ubyte_t)0), unknown4(0.0f), unknown5((int)0), unknown6((short)0), unknown7((int)0) {
 	//--BEGIN CONSTRUCTOR CUSTOM CODE--//
 
 	//--END CUSTOM CODE--//

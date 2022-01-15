@@ -84,7 +84,7 @@ protected:
 	/*! Unknown */
 	float unknownFloat1;
 	/*! Unknown */
-	byte removeIfBroken;
+	ubyte_t removeIfBroken;
 public:
 	/*! NIFLIB_HIDDEN function.  For internal use only. */
 	NIFLIB_HIDDEN virtual void Read( istream& in, list<unsigned int> & link_stack, const NifInfo & info );

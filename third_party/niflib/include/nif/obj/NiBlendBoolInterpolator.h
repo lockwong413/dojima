@@ -58,18 +58,18 @@ public:
 	 * Gets the boolean value stored in this object.  Perhaps this is the current interpolated value.
 	 * \return The boolean value stored in this object.
 	 */
-	NIFLIB_API byte GetBoolValue() const;
+	NIFLIB_API ubyte_t GetBoolValue() const;
 
 	/*!
 	 * Sets the boolean value stored in this object.  Perhaps this is the current interpolated value.
 	 * \param[in] value The new boolean value to store in this object.
 	 */
-	NIFLIB_API void SetBoolValue( byte value );
+	NIFLIB_API void SetBoolValue( ubyte_t value );
 
 	//--END CUSTOM CODE--//
 protected:
 	/*! The interpolated bool? */
-	byte boolValue;
+	ubyte_t boolValue;
 public:
 	/*! NIFLIB_HIDDEN function.  For internal use only. */
 	NIFLIB_HIDDEN virtual void Read( istream& in, list<unsigned int> & link_stack, const NifInfo & info );

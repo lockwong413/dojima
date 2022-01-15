@@ -20,7 +20,7 @@ using namespace Niflib;
 //Definition of TYPE constant
 const Type NiImage::TYPE("NiImage", &NiObject::TYPE );
 
-NiImage::NiImage() : useExternal((byte)0), imageData(NULL), unknownInt((unsigned int)7), unknownFloat(128.5f) {
+NiImage::NiImage() : useExternal((ubyte_t)0), imageData(NULL), unknownInt((unsigned int)7), unknownFloat(128.5f) {
 	//--BEGIN CONSTRUCTOR CUSTOM CODE--//
 	//--END CUSTOM CODE--//
 }

@@ -20,7 +20,7 @@ using namespace Niflib;
 //Definition of TYPE constant
 const Type BSValueNode::TYPE("BSValueNode", &NiNode::TYPE );
 
-BSValueNode::BSValueNode() : value((int)0), unknownByte((byte)0) {
+BSValueNode::BSValueNode() : value((int)0), unknownByte((ubyte_t)0) {
 	//--BEGIN CONSTRUCTOR CUSTOM CODE--//
 
 	//--END CUSTOM CODE--//
@@ -76,7 +76,7 @@ std::string BSValueNode::asString( bool verbose ) const {
 	stringstream out;
 	out << NiNode::asString();
 	out << "  Value:  " << value << endl;
-	out << "  Unknown byte:  " << unknownByte << endl;
+	out << "  Unknown ubyte_t:  " << unknownByte << endl;
 	return out.str();
 
 	//--BEGIN POST-STRING CUSTOM CODE--//

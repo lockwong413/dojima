@@ -20,7 +20,7 @@ using namespace Niflib;
 //Definition of TYPE constant
 const Type BSBlastNode::TYPE("BSBlastNode", &NiNode::TYPE );
 
-BSBlastNode::BSBlastNode() : unknownByte1((byte)0), unknownShort2((short)0) {
+BSBlastNode::BSBlastNode() : unknownByte1((ubyte_t)0), unknownShort2((short)0) {
 	//--BEGIN CONSTRUCTOR CUSTOM CODE--//
 
 	//--END CUSTOM CODE--//

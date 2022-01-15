@@ -22,7 +22,7 @@ using namespace Niflib;
 //Definition of TYPE constant
 const Type NiMorphMeshModifier::TYPE("NiMorphMeshModifier", &NiMeshModifier::TYPE );
 
-NiMorphMeshModifier::NiMorphMeshModifier() : flags((byte)0), numTargets((unsigned short)0), numElements((unsigned int)0) {
+NiMorphMeshModifier::NiMorphMeshModifier() : flags((ubyte_t)0), numTargets((unsigned short)0), numElements((unsigned int)0) {
 	//--BEGIN CONSTRUCTOR CUSTOM CODE--//
 
 	//--END CUSTOM CODE--//

@@ -61,13 +61,13 @@ public:
 	 * Retrieves the binary data stored in this object.
 	 * \return The binary data stored in this object.
 	 */
-	NIFLIB_API vector<byte> GetData() const;
+	NIFLIB_API vector<ubyte_t> GetData() const;
 
 	/*!
 	 * Sets the binary data stored in this object.  Removes any previous data.
 	 * \param[in] n The new binary data to store in this object.
 	 */
-	NIFLIB_API void SetData( const vector<byte> & n );
+	NIFLIB_API void SetData( const vector<ubyte_t> & n );
 
 	//--END CUSTOM CODE--//
 protected:

@@ -29,7 +29,7 @@ struct TexSource {
 	/*! Copy Operator */
 	NIFLIB_API TexSource & operator=( const TexSource & src );
 	/*! Is the texture external? */
-	byte useExternal;
+	ubyte_t useExternal;
 	/*!
 	 * The external texture file name.
 	 * 
@@ -42,7 +42,7 @@ struct TexSource {
 	/*! Unknown. */
 	Ref<NiObject > unknownLink;
 	/*! Unknown. */
-	byte unknownByte;
+	ubyte_t unknownByte;
 	/*! Pixel data object index. */
 	Ref<NiPixelData > pixelData;
 	//--BEGIN MISC CUSTOM CODE--//

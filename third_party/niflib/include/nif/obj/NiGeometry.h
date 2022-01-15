@@ -215,7 +215,7 @@ protected:
 	/*! Unknown value, usually -1. (Not a link) */
 	int unknownInteger;
 	/*! Cyanide extension (only in version 10.2.0.0?). */
-	byte unknownByte;
+	ubyte_t unknownByte;
 	/*! Unknown. */
 	int unknownInteger2;
 	/*! Dirty Flag? */

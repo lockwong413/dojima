@@ -116,7 +116,7 @@ protected:
 	/*! Unknown. */
 	float unknownFloat1;
 	/*! Unknown. */
-	Niflib::array<8,byte > unknown8Bytes;
+	Niflib::array<8,ubyte_t > unknown8Bytes;
 	/*! A transform matrix. */
 	Matrix44 transform;
 public:

@@ -21,7 +21,7 @@ using namespace Niflib;
 //Definition of TYPE constant
 const Type NiPSParticleSystem::TYPE("NiPSParticleSystem", &NiAVObject::TYPE );
 
-NiPSParticleSystem::NiPSParticleSystem() : unknown3((int)0), unknown4((int)0), unknown5((int)0), unknown6((int)0), unknown7((int)0), unknown8((int)0), unknown9((int)0), unknown10(0.0f), unknown11((int)0), unknown12((int)0), simulator(NULL), generator(NULL), unknown15((int)0), unknown16((int)0), unknown17((int)0), emitter(NULL), unknown19((int)0), unknown20((int)0), unknown21((int)0), unknown27((int)0), unknown28((int)0), unknown29((int)0), unknown30((int)0), unknown31((int)0), unknown32((int)0), unknown33((int)0), unknown34((int)0), unknown35((byte)0), unknown36((int)0), unknown37((short)0) {
+NiPSParticleSystem::NiPSParticleSystem() : unknown3((int)0), unknown4((int)0), unknown5((int)0), unknown6((int)0), unknown7((int)0), unknown8((int)0), unknown9((int)0), unknown10(0.0f), unknown11((int)0), unknown12((int)0), simulator(NULL), generator(NULL), unknown15((int)0), unknown16((int)0), unknown17((int)0), emitter(NULL), unknown19((int)0), unknown20((int)0), unknown21((int)0), unknown27((int)0), unknown28((int)0), unknown29((int)0), unknown30((int)0), unknown31((int)0), unknown32((int)0), unknown33((int)0), unknown34((int)0), unknown35((ubyte_t)0), unknown36((int)0), unknown37((short)0) {
 	//--BEGIN CONSTRUCTOR CUSTOM CODE--//
 
 	//--END CUSTOM CODE--//

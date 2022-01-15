@@ -61,7 +61,7 @@ public:
 	//--END CUSTOM CODE--//
 protected:
 	/*! The number of rotation keys. */
-	mutable byte numRotationKeys;
+	mutable ubyte_t numRotationKeys;
 	/*! The particle rotation keys. */
 	vector<Key<Quaternion > > rotationKeys;
 	/*! The loop behavior for the rotation keys. */

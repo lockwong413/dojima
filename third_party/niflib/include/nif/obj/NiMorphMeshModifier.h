@@ -69,7 +69,7 @@ protected:
 	 *             FLAG_SKINNED         = 0x20
 	 *             FLAG_SWSKINNED       = 0x40
 	 */
-	byte flags;
+	ubyte_t flags;
 	/*! The number of morph targets. */
 	unsigned short numTargets;
 	/*! The number of morphing data stream elements. */

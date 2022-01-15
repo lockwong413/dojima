@@ -146,9 +146,9 @@ short ReadShort( istream& in ){
 	return tmp;
 }
 
-byte ReadByte( istream& in ){
+ubyte_t ReadByte( istream& in ){
 
-	byte tmp = 0;
+	ubyte_t tmp = 0;
 	in.read( (char*)&tmp, 1 );
 	if (in.fail())
 	  throw runtime_error("premature end of stream");
@@ -231,7 +231,7 @@ void WriteShort( short val, ostream& out ){
 	out.write( (char*)&val, 2 );
 }
 
-void WriteByte( byte val, ostream& out ){
+void WriteByte( ubyte_t val, ostream& out ){
 
 	out.write( (char*)&val, 1 );
 }
@@ -336,12 +336,12 @@ void NifStream( short const & val, ostream& out, const NifInfo & info ) {
 	}
 }
 
-//byte
-void NifStream( byte & val, istream& in, const NifInfo & info ) {
+//ubyte_t
+void NifStream( ubyte_t & val, istream& in, const NifInfo & info ) {
 	val = ReadByte( in );
 }
 
-void NifStream( byte const & val, ostream& out, const NifInfo & info ) {
+void NifStream( ubyte_t const & val, ostream& out, const NifInfo & info ) {
 	WriteByte( val, out );
 }
 
@@ -449,7 +449,7 @@ ostream & operator<<( ostream & out, LineString const & val ) {
 
 //ShortString
 void NifStream( ShortString & val, istream& in, const NifInfo & info ) {
-	byte len = ReadByte( in );
+	ubyte_t len = ReadByte( in );
 	char * buffer = new char[len];
 	in.read( buffer, len );
 	if (in.fail())
@@ -459,7 +459,7 @@ void NifStream( ShortString & val, istream& in, const NifInfo & info ) {
 };
 
 void NifStream( ShortString const & val, ostream& out, const NifInfo & info ) {
-	WriteByte( byte(val.str.size() + 1), out );
+	WriteByte( ubyte_t(val.str.size() + 1), out );
 	out.write( val.str.c_str(), std::streamsize(val.str.size()) );
 	WriteByte( 0, out );
 };
@@ -655,7 +655,7 @@ void NifStream( Quaternion const & val, ostream& out, const NifInfo & info ) {
 
 //The HexString function creates a formatted hex display of the given data for use in printing
 //a debug string for information that is not understood
-string HexString( const byte * src, unsigned int len ) {
+string HexString( const ubyte_t * src, unsigned int len ) {
 	stringstream out;
 	
 	//Display Data in Hex form
@@ -678,7 +678,7 @@ string HexString( const byte * src, unsigned int len ) {
 }
 
 //Byte
-ostream & operator<<( ostream & out, byte const & val ) {
+ostream & operator<<( ostream & out, ubyte_t const & val ) {
 	return out << (unsigned int)(val);
 }
 

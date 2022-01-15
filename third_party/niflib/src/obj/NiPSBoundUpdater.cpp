@@ -20,7 +20,7 @@ using namespace Niflib;
 //Definition of TYPE constant
 const Type NiPSBoundUpdater::TYPE("NiPSBoundUpdater", &NiObject::TYPE );
 
-NiPSBoundUpdater::NiPSBoundUpdater() : unknown1((byte)0), unknown2((byte)0) {
+NiPSBoundUpdater::NiPSBoundUpdater() : unknown1((ubyte_t)0), unknown2((ubyte_t)0) {
 	//--BEGIN CONSTRUCTOR CUSTOM CODE--//
 
 	//--END CUSTOM CODE--//

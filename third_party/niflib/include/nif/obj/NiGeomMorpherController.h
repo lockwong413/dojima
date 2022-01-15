@@ -105,11 +105,11 @@ protected:
 	/*! Unknown. */
 	unsigned short extraFlags;
 	/*! Unknown. */
-	byte unknown2;
+	ubyte_t unknown2;
 	/*! Geometry morphing data index. */
 	Ref<NiMorphData > data;
 	/*! Always Update */
-	byte alwaysUpdate;
+	ubyte_t alwaysUpdate;
 	/*! The number of interpolator objects. */
 	mutable unsigned int numInterpolators;
 	/*! List of interpolators. */

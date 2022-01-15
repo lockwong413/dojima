@@ -19,7 +19,7 @@ using namespace Niflib;
 //Definition of TYPE constant
 const Type NiAlphaProperty::TYPE("NiAlphaProperty", &NiProperty::TYPE );
 
-NiAlphaProperty::NiAlphaProperty() : flags((unsigned short)237), threshold((byte)0), unknownShort1((unsigned short)0), unknownInt2((unsigned int)0) {
+NiAlphaProperty::NiAlphaProperty() : flags((unsigned short)237), threshold((ubyte_t)0), unknownShort1((unsigned short)0), unknownInt2((unsigned int)0) {
 	//--BEGIN CONSTRUCTOR CUSTOM CODE--//
 	//--END CUSTOM CODE--//
 }
@@ -117,11 +117,11 @@ void NiAlphaProperty::SetFlags( unsigned short n ) {
 	flags = n;
 }
 
-byte NiAlphaProperty::GetTestThreshold() const {
+ubyte_t NiAlphaProperty::GetTestThreshold() const {
 	return threshold;
 }
 
-void NiAlphaProperty::SetTestThreshold( byte n ) {
+void NiAlphaProperty::SetTestThreshold( ubyte_t n ) {
 	threshold = n;
 }
 

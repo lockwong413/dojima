@@ -100,10 +100,10 @@ protected:
 	 * bit sets the SCALED property in Oblivion. The next five bits make up the number
 	 * of this part in a linked body list.
 	 */
-	byte colFilter;
+	ubyte_t colFilter;
 	/*!
 	*/
-	byte flagsAndPartNumber;
+	ubyte_t flagsAndPartNumber;
 	/*! Unknown. */
 	unsigned short unknownShort;
 public:

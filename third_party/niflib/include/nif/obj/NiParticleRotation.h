@@ -56,7 +56,7 @@ public:
 	//--END CUSTOM CODE--//
 protected:
 	/*! Unknown. */
-	byte randomInitialAxis_;
+	ubyte_t randomInitialAxis_;
 	/*! Unknown. */
 	Vector3 initialAxis_;
 	/*! Unknown. */

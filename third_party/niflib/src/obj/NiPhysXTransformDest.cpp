@@ -21,7 +21,7 @@ using namespace Niflib;
 //Definition of TYPE constant
 const Type NiPhysXTransformDest::TYPE("NiPhysXTransformDest", &NiObject::TYPE );
 
-NiPhysXTransformDest::NiPhysXTransformDest() : unknownByte1((byte)0), unknownByte2((byte)0), node(NULL) {
+NiPhysXTransformDest::NiPhysXTransformDest() : unknownByte1((ubyte_t)0), unknownByte2((ubyte_t)0), node(NULL) {
 	//--BEGIN CONSTRUCTOR CUSTOM CODE--//
 
 	//--END CUSTOM CODE--//

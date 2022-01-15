@@ -183,7 +183,7 @@ public:
 		bool stripify = false,
 		bool tangent_space = false,
 		float min_vertex_weight = 0.001f,
-		byte tspace_flags = 0
+		ubyte_t tspace_flags = 0
 	) const;
 
 	/* 

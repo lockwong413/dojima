@@ -28,9 +28,9 @@ struct ChannelData {
 	/*! Data Storage Convention */
 	ChannelConvention convention;
 	/*! Bits per channel */
-	byte bitsPerChannel;
+	ubyte_t bitsPerChannel;
 	/*! Unknown */
-	byte unknownByte1;
+	ubyte_t unknownByte1;
 	//--BEGIN MISC CUSTOM CODE--//
 	//--END CUSTOM CODE--//
 };

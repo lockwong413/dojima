@@ -63,7 +63,7 @@ protected:
 	/*! Number of keys. */
 	mutable unsigned int numVisibilityKeys_;
 	/*! Unknown. */
-	vector<Key<byte > > visibilityKeys_;
+	vector<Key<ubyte_t > > visibilityKeys_;
 public:
 	/*! NIFLIB_HIDDEN function.  For internal use only. */
 	NIFLIB_HIDDEN virtual void Read( istream& in, list<unsigned int> & link_stack, const NifInfo & info );

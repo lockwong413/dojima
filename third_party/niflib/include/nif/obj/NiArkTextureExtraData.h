@@ -63,7 +63,7 @@ protected:
 	/*! Unknown. */
 	Niflib::array<2,int > unknownInts1;
 	/*! Unknown. */
-	byte unknownByte;
+	ubyte_t unknownByte;
 	/*! Unknown. */
 	int unknownInt2;
 	/*! Unknown. */

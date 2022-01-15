@@ -119,11 +119,11 @@ std::list<NiObject *> NiBinaryExtraData::GetPtrs() const {
 
 //--BEGIN MISC CUSTOM CODE--//
 
-vector<byte> NiBinaryExtraData::GetData() const {
+vector<ubyte_t> NiBinaryExtraData::GetData() const {
 	return binaryData.data;
 };
 
-void NiBinaryExtraData::SetData( const vector<byte> & n ) {
+void NiBinaryExtraData::SetData( const vector<ubyte_t> & n ) {
 	binaryData.dataSize = (unsigned int)(n.size());
 	binaryData.data = n;
 };

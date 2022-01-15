@@ -81,9 +81,9 @@ protected:
 	/*! Unknown */
 	int unknownInt5;
 	/*! Unknown */
-	byte unknownByte1;
+	ubyte_t unknownByte1;
 	/*! Unknown */
-	byte unknownByte2;
+	ubyte_t unknownByte2;
 	/*! Unknown */
 	mutable int unknownInt6;
 	/*! PhysX Shape Description */

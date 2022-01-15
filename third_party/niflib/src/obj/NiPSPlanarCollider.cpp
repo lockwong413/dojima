@@ -21,7 +21,7 @@ using namespace Niflib;
 //Definition of TYPE constant
 const Type NiPSPlanarCollider::TYPE("NiPSPlanarCollider", &NiObject::TYPE );
 
-NiPSPlanarCollider::NiPSPlanarCollider() : unknownInt1((int)0), unknownInt2((int)0), unknownShort3((short)0), unknownByte4((byte)0), unknownLink6(NULL) {
+NiPSPlanarCollider::NiPSPlanarCollider() : unknownInt1((int)0), unknownInt2((int)0), unknownShort3((short)0), unknownByte4((ubyte_t)0), unknownLink6(NULL) {
 	//--BEGIN CONSTRUCTOR CUSTOM CODE--//
 
 	//--END CUSTOM CODE--//

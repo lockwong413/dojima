@@ -9,7 +9,7 @@ All rights reserved.  Please see niflib.h for license. */
 using namespace Niflib;
 
 //Constructor
-MotorDescriptor::MotorDescriptor() : unknownFloat1(-1000000.0f), unknownFloat2(1000000.0f), unknownFloat3(0.8f), unknownFloat4(1.0f), unknownFloat5(2.0f), unknownFloat6(1.0f), unknownByte1((byte)0) {};
+MotorDescriptor::MotorDescriptor() : unknownFloat1(-1000000.0f), unknownFloat2(1000000.0f), unknownFloat3(0.8f), unknownFloat4(1.0f), unknownFloat5(2.0f), unknownFloat6(1.0f), unknownByte1((ubyte_t)0) {};
 
 //Copy Constructor
 MotorDescriptor::MotorDescriptor( const MotorDescriptor & src ) {

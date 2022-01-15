@@ -19,7 +19,7 @@ using namespace Niflib;
 //Definition of TYPE constant
 const Type NiBooleanExtraData::TYPE("NiBooleanExtraData", &NiExtraData::TYPE );
 
-NiBooleanExtraData::NiBooleanExtraData() : booleanData((byte)0) {
+NiBooleanExtraData::NiBooleanExtraData() : booleanData((ubyte_t)0) {
 	//--BEGIN CONSTRUCTOR CUSTOM CODE--//
 	//--END CUSTOM CODE--//
 }

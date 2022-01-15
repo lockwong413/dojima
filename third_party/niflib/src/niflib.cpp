@@ -253,7 +253,7 @@ vector<NiObjectRef> ReadNifList( istream & in, list<NiObjectRef> & missing_link_
 		//There are two main ways to read objects
 		//One before version 5.0.0.1 and one after
 		if ( header.version >= 0x05000001 ) {
-			//From version 5.0.0.1 to version 10.0.1.106  there is a zero byte at the begining of each object
+			//From version 5.0.0.1 to version 10.0.1.106  there is a zero ubyte_t at the begining of each object
 			
 			if ( header.version <= VER_10_1_0_106 ) {
 				unsigned int checkValue = ReadUInt( in );

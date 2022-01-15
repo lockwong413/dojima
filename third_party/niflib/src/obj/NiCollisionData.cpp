@@ -24,7 +24,7 @@ using namespace Niflib;
 //Definition of TYPE constant
 const Type NiCollisionData::TYPE("NiCollisionData", &NiCollisionObject::TYPE );
 
-NiCollisionData::NiCollisionData() : propagationMode((PropagationMode)0), collisionMode((CollisionMode)0), useAbv((byte)0) {
+NiCollisionData::NiCollisionData() : propagationMode((PropagationMode)0), collisionMode((CollisionMode)0), useAbv((ubyte_t)0) {
 	//--BEGIN CONSTRUCTOR CUSTOM CODE--//
 	//--END CUSTOM CODE--//
 }

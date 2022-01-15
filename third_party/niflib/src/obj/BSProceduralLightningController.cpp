@@ -21,7 +21,7 @@ using namespace Niflib;
 //Definition of TYPE constant
 const Type BSProceduralLightningController::TYPE("BSProceduralLightningController", &NiFloatInterpController::TYPE );
 
-BSProceduralLightningController::BSProceduralLightningController() : interpolator2_Mutation(NULL), interpolator3(NULL), interpolator4(NULL), interpolator5(NULL), interpolator6(NULL), interpolator7(NULL), interpolator8(NULL), interpolator9_ArcOffset(NULL), unknownShort1((unsigned short)0), unknownShort2((unsigned short)0), unknownShort3((unsigned short)0), distanceWeight(0.0f), float2(0.0f), stripWidth(0.0f), fork(0.0f), float5(0.0f), byte1((byte)0), byte2((byte)0), byte3((byte)0), interpolator10_(NULL) {
+BSProceduralLightningController::BSProceduralLightningController() : interpolator2_Mutation(NULL), interpolator3(NULL), interpolator4(NULL), interpolator5(NULL), interpolator6(NULL), interpolator7(NULL), interpolator8(NULL), interpolator9_ArcOffset(NULL), unknownShort1((unsigned short)0), unknownShort2((unsigned short)0), unknownShort3((unsigned short)0), distanceWeight(0.0f), float2(0.0f), stripWidth(0.0f), fork(0.0f), float5(0.0f), byte1((ubyte_t)0), byte2((ubyte_t)0), byte3((ubyte_t)0), interpolator10_(NULL) {
 	//--BEGIN CONSTRUCTOR CUSTOM CODE--//
 
 	//--END CUSTOM CODE--//

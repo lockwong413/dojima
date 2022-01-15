@@ -64,7 +64,7 @@ protected:
 	/*! Unknown. */
 	Niflib::array<7,float > unknown7Floats;
 	/*! Unknown. Always a multiple of 7. */
-	Niflib::array< 7, Niflib::array<12,byte > > unknownBytes1;
+	Niflib::array< 7, Niflib::array<12,ubyte_t > > unknownBytes1;
 	/*! Unknown. */
 	mutable unsigned int numUnknownVectors;
 	/*! Vectors on the unit sphere. */
@@ -72,7 +72,7 @@ protected:
 	/*! Unknown. */
 	mutable unsigned int numUnknownBytes2;
 	/*! Unknown. */
-	vector<byte > unknownBytes2;
+	vector<ubyte_t > unknownBytes2;
 	/*! Unknown. */
 	Niflib::array<5,unsigned int > unknown5Ints;
 public:

@@ -24,7 +24,7 @@ using namespace Niflib;
 //Definition of TYPE constant
 const Type NiPhysXPropDesc::TYPE("NiPhysXPropDesc", &NiObject::TYPE );
 
-NiPhysXPropDesc::NiPhysXPropDesc() : numDests((int)0), numJoints((unsigned int)0), unknownInt1((int)0), numMaterials((unsigned int)0), unknownInt2((unsigned int)0), unknownInt3((unsigned int)0), unknownInt5((unsigned int)0), unknownByte6((byte)0) {
+NiPhysXPropDesc::NiPhysXPropDesc() : numDests((int)0), numJoints((unsigned int)0), unknownInt1((int)0), numMaterials((unsigned int)0), unknownInt2((unsigned int)0), unknownInt3((unsigned int)0), unknownInt5((unsigned int)0), unknownByte6((ubyte_t)0) {
 	//--BEGIN CONSTRUCTOR CUSTOM CODE--//
 
 	//--END CUSTOM CODE--//

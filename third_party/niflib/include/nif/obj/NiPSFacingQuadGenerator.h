@@ -58,29 +58,29 @@ public:
 	//--END CUSTOM CODE--//
 protected:
 	/*! Unknown. */
-	byte unknown1;
+	ubyte_t unknown1;
 	/*! Unknown. */
-	byte unknown2;
+	ubyte_t unknown2;
 	/*! Unknown. */
-	byte unknown3;
+	ubyte_t unknown3;
 	/*! Unknown. */
-	byte unknown4;
+	ubyte_t unknown4;
 	/*! Unknown. */
-	byte unknown5;
+	ubyte_t unknown5;
 	/*! Unknown. */
-	byte unknown6;
+	ubyte_t unknown6;
 	/*! Unknown. */
-	byte unknown7;
+	ubyte_t unknown7;
 	/*! Unknown. */
-	byte unknown8;
+	ubyte_t unknown8;
 	/*! Unknown. */
-	byte unknown9;
+	ubyte_t unknown9;
 	/*! Unknown. */
-	byte unknown10;
+	ubyte_t unknown10;
 	/*! Unknown. */
-	byte unknown11;
+	ubyte_t unknown11;
 	/*! Unknown. */
-	byte unknown12;
+	ubyte_t unknown12;
 public:
 	/*! NIFLIB_HIDDEN function.  For internal use only. */
 	NIFLIB_HIDDEN virtual void Read( istream& in, list<unsigned int> & link_stack, const NifInfo & info );

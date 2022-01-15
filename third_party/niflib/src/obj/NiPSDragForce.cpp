@@ -20,7 +20,7 @@ using namespace Niflib;
 //Definition of TYPE constant
 const Type NiPSDragForce::TYPE("NiPSDragForce", &NiObject::TYPE );
 
-NiPSDragForce::NiPSDragForce() : unknown1((int)0), unknown2((int)0), unknown3((byte)0), unknown4(0.0f), unknown5(0.0f), unknown6(0.0f), unknown7(0.0f), unknown8(0.0f), unknown9(0.0f), unknown10((int)0) {
+NiPSDragForce::NiPSDragForce() : unknown1((int)0), unknown2((int)0), unknown3((ubyte_t)0), unknown4(0.0f), unknown5(0.0f), unknown6(0.0f), unknown7(0.0f), unknown8(0.0f), unknown9(0.0f), unknown10((int)0) {
 	//--BEGIN CONSTRUCTOR CUSTOM CODE--//
 
 	//--END CUSTOM CODE--//

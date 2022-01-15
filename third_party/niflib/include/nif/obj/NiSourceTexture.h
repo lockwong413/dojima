@@ -131,13 +131,13 @@ public:
 	//--END CUSTOM CODE--//
 protected:
 	/*! Is the texture external? */
-	byte useExternal;
+	ubyte_t useExternal;
 	/*! The external texture file name. */
 	IndexString fileName;
 	/*! Unknown. */
 	Ref<NiObject > unknownLink;
 	/*! Unknown. Seems to be set if Pixel Data is present? */
-	byte unknownByte;
+	ubyte_t unknownByte;
 	/*! Pixel data object index. NiPixelData or NiPersistentSrcTextureRendererData */
 	Ref<ATextureRenderData > pixelData;
 	/*! Specifies the way the image will be stored. */
@@ -150,7 +150,7 @@ protected:
 	 */
 	AlphaFormat alphaFormat;
 	/*! Is Static? */
-	byte isStatic;
+	ubyte_t isStatic;
 	/*! Load direct to renderer */
 	bool directRender;
 	/*! Render data is persistant */

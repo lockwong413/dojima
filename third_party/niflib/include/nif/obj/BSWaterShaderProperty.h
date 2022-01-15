@@ -77,7 +77,7 @@ protected:
 	 * A bitflag, only the first/second bit controls water flow positive or negative
 	 * along UVs.
 	 */
-	byte waterDirection;
+	ubyte_t waterDirection;
 	/*! Unknown, flag? */
 	unsigned short unknownShort3;
 public:

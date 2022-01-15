@@ -21,7 +21,7 @@ using namespace Niflib;
 //Definition of TYPE constant
 const Type bhkBreakableConstraint::TYPE("bhkBreakableConstraint", &bhkConstraint::TYPE );
 
-bhkBreakableConstraint::bhkBreakableConstraint() : unknownShort1((short)0), unknownInt1((unsigned int)0), numEntities2((unsigned int)0), priority2((unsigned int)1), unknownInt2((unsigned int)0), unknownInt3((unsigned int)0), threshold(0.0f), unknownFloat1(0.0f), removeIfBroken((byte)0) {
+bhkBreakableConstraint::bhkBreakableConstraint() : unknownShort1((short)0), unknownInt1((unsigned int)0), numEntities2((unsigned int)0), priority2((unsigned int)1), unknownInt2((unsigned int)0), unknownInt3((unsigned int)0), threshold(0.0f), unknownFloat1(0.0f), removeIfBroken((ubyte_t)0) {
 	//--BEGIN CONSTRUCTOR CUSTOM CODE--//
 
 	//--END CUSTOM CODE--//

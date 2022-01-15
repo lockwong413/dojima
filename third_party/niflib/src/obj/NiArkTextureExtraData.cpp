@@ -22,7 +22,7 @@ using namespace Niflib;
 //Definition of TYPE constant
 const Type NiArkTextureExtraData::TYPE("NiArkTextureExtraData", &NiExtraData::TYPE );
 
-NiArkTextureExtraData::NiArkTextureExtraData() : unknownByte((byte)0), unknownInt2((int)0), numTextures((int)0) {
+NiArkTextureExtraData::NiArkTextureExtraData() : unknownByte((ubyte_t)0), unknownInt2((int)0), numTextures((int)0) {
 	//--BEGIN CONSTRUCTOR CUSTOM CODE--//
 
 	//--END CUSTOM CODE--//

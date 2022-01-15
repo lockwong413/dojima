@@ -19,7 +19,7 @@ using namespace Niflib;
 //Definition of TYPE constant
 const Type NiFloatExtraDataController::TYPE("NiFloatExtraDataController", &NiExtraDataController::TYPE );
 
-NiFloatExtraDataController::NiFloatExtraDataController() : numExtraBytes((byte)0) {
+NiFloatExtraDataController::NiFloatExtraDataController() : numExtraBytes((ubyte_t)0) {
 	//--BEGIN CONSTRUCTOR CUSTOM CODE--//
 	//--END CUSTOM CODE--//
 }
@@ -65,7 +65,7 @@ void NiFloatExtraDataController::Write( ostream& out, const map<NiObjectRef,unsi
 	//--END CUSTOM CODE--//
 
 	NiExtraDataController::Write( out, link_map, missing_link_stack, info );
-	numExtraBytes = (byte)(unknownExtraBytes.size());
+	numExtraBytes = (ubyte_t)(unknownExtraBytes.size());
 	if ( info.version >= 0x0A020000 ) {
 		NifStream( controllerData, out, info );
 	};
@@ -90,7 +90,7 @@ std::string NiFloatExtraDataController::asString( bool verbose ) const {
 	stringstream out;
 	unsigned int array_output_count = 0;
 	out << NiExtraDataController::asString();
-	numExtraBytes = (byte)(unknownExtraBytes.size());
+	numExtraBytes = (ubyte_t)(unknownExtraBytes.size());
 	out << "  Controller Data:  " << controllerData << endl;
 	out << "  Num Extra Bytes:  " << numExtraBytes << endl;
 	array_output_count = 0;

@@ -26,7 +26,7 @@ using namespace Niflib;
 //Definition of TYPE constant
 const Type NiGeomMorpherController::TYPE("NiGeomMorpherController", &NiInterpController::TYPE );
 
-NiGeomMorpherController::NiGeomMorpherController() : extraFlags((unsigned short)0), unknown2((byte)0), data(NULL), alwaysUpdate((byte)0), numInterpolators((unsigned int)0), numUnknownInts((unsigned int)0) {
+NiGeomMorpherController::NiGeomMorpherController() : extraFlags((unsigned short)0), unknown2((ubyte_t)0), data(NULL), alwaysUpdate((ubyte_t)0), numInterpolators((unsigned int)0), numUnknownInts((unsigned int)0) {
 	//--BEGIN CONSTRUCTOR CUSTOM CODE--//
 	//--END CUSTOM CODE--//
 }

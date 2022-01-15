@@ -20,7 +20,7 @@ using namespace Niflib;
 //Definition of TYPE constant
 const Type NiPalette::TYPE("NiPalette", &NiObject::TYPE );
 
-NiPalette::NiPalette() : unknownByte((byte)0), numEntries((unsigned int)256) {
+NiPalette::NiPalette() : unknownByte((ubyte_t)0), numEntries((unsigned int)256) {
 	//--BEGIN CONSTRUCTOR CUSTOM CODE--//
 	//--END CUSTOM CODE--//
 }

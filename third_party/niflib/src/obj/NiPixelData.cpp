@@ -410,7 +410,7 @@ void NiPixelData::SetColors( const vector<Color4> & new_pixels, bool generate_mi
 		#endif
 
 		//Start at offset
-		byte * map = &pixelData[0][mipmaps[i].offset];
+		ubyte_t * map = &pixelData[0][mipmaps[i].offset];
 
 		switch(pixelFormat) {
 		case PX_FMT_RGB8:
@@ -440,7 +440,9 @@ void NiPixelData::SetColors( const vector<Color4> & new_pixels, bool generate_mi
 			//	cin.get();
 			//#endif
 			break;
+
 		case PX_FMT_PAL8:
+		default:
 			throw runtime_error("The SetColors function only supports the PX_FMT_RGB8 and PX_FMT_RGBA8 pixel formats.");
 			break;
 		}

@@ -163,8 +163,8 @@ protected:
 	mutable unsigned int numMorphs;
 	/*! Number of vertices. */
 	unsigned int numVertices;
-	/*! This byte is always 1 in all official files. */
-	byte relativeTargets;
+	/*! This ubyte_t is always 1 in all official files. */
+	ubyte_t relativeTargets;
 	/*! The geometry morphing objects. */
 	vector<Morph > morphs;
 public:

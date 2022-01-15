@@ -173,7 +173,7 @@ public:
 	 * 1: Enabled
 	 * \return The clipping plane behavior.
 	 */
-	NIFLIB_API byte GetClippingPlane() const;
+	NIFLIB_API ubyte_t GetClippingPlane() const;
 
 	/*!
 	 * Sets the clipping plane behavior.  Valid values are:
@@ -181,7 +181,7 @@ public:
 	 * 1: Enabled
 	 * \param[in] value The new clipping plane behavior.
 	 */
-	NIFLIB_API void SetClippingPlane( byte value );
+	NIFLIB_API void SetClippingPlane( ubyte_t value );
 
 	/*!
 	 * Retrieves a Playstation 2 - specific value.  Can just be left at the default of 0.
@@ -228,7 +228,7 @@ protected:
 	/*! Source texture index. */
 	Ref<NiSourceTexture > sourceTexture;
 	/*! Determines whether a clipping plane is used.  0 means that a plane is not used. */
-	byte clippingPlane;
+	ubyte_t clippingPlane;
 	/*! Unknown: (1,0,0)? */
 	Vector3 unknownVector;
 	/*! Unknown. 0? */

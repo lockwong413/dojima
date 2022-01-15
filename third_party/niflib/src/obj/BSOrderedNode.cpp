@@ -20,7 +20,7 @@ using namespace Niflib;
 //Definition of TYPE constant
 const Type BSOrderedNode::TYPE("BSOrderedNode", &NiNode::TYPE );
 
-BSOrderedNode::BSOrderedNode() : isStaticBound((byte)0) {
+BSOrderedNode::BSOrderedNode() : isStaticBound((ubyte_t)0) {
 	//--BEGIN CONSTRUCTOR CUSTOM CODE--//
 
 	//--END CUSTOM CODE--//

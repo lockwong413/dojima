@@ -58,7 +58,7 @@ public:
 	//--END CUSTOM CODE--//
 protected:
 	/*! Unknown */
-	byte unknownByte1;
+	ubyte_t unknownByte1;
 	/*! Unknown */
 	short unknownShort2;
 public:

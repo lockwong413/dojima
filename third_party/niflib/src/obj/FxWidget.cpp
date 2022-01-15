@@ -19,7 +19,7 @@ using namespace Niflib;
 //Definition of TYPE constant
 const Type FxWidget::TYPE("FxWidget", &NiNode::TYPE );
 
-FxWidget::FxWidget() : unknown3((byte)0) {
+FxWidget::FxWidget() : unknown3((ubyte_t)0) {
 	//--BEGIN CONSTRUCTOR CUSTOM CODE--//
 	//--END CUSTOM CODE--//
 }

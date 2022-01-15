@@ -20,7 +20,7 @@ using namespace Niflib;
 //Definition of TYPE constant
 const Type BSWaterShaderProperty::TYPE("BSWaterShaderProperty", &NiProperty::TYPE );
 
-BSWaterShaderProperty::BSWaterShaderProperty() : shaderFlags1((SkyrimShaderPropertyFlags1)0), shaderFlags2((SkyrimShaderPropertyFlags2)0), uvScale(1.0, 1.0), waterShaderFlags((SkyrimWaterShaderFlags)0), waterDirection((byte)3), unknownShort3((unsigned short)0) {
+BSWaterShaderProperty::BSWaterShaderProperty() : shaderFlags1((SkyrimShaderPropertyFlags1)0), shaderFlags2((SkyrimShaderPropertyFlags2)0), uvScale(1.0, 1.0), waterShaderFlags((SkyrimWaterShaderFlags)0), waterDirection((ubyte_t)3), unknownShort3((unsigned short)0) {
 	//--BEGIN CONSTRUCTOR CUSTOM CODE--//
 
 	//--END CUSTOM CODE--//

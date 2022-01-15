@@ -20,7 +20,7 @@ using namespace Niflib;
 //Definition of TYPE constant
 const Type NiBezierTriangle4::TYPE("NiBezierTriangle4", &NiObject::TYPE );
 
-NiBezierTriangle4::NiBezierTriangle4() : unknown2((unsigned short)0), unknown4((byte)0), unknown5((unsigned int)0) {
+NiBezierTriangle4::NiBezierTriangle4() : unknown2((unsigned short)0), unknown4((ubyte_t)0), unknown5((unsigned int)0) {
 	//--BEGIN CONSTRUCTOR CUSTOM CODE--//
 
 	//--END CUSTOM CODE--//

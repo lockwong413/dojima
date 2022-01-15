@@ -24,13 +24,13 @@ struct ByteColor4 {
 	/*! Copy Operator */
 	NIFLIB_API ByteColor4 & operator=( const ByteColor4 & src );
 	/*! Red color component. */
-	byte r;
+	ubyte_t r;
 	/*! Green color component. */
-	byte g;
+	ubyte_t g;
 	/*! Blue color component. */
-	byte b;
+	ubyte_t b;
 	/*! Alpha color component. */
-	byte a;
+	ubyte_t a;
 	//--BEGIN MISC CUSTOM CODE--//
 	//--END CUSTOM CODE--//
 };

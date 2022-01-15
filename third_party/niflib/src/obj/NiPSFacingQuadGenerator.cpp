@@ -20,7 +20,7 @@ using namespace Niflib;
 //Definition of TYPE constant
 const Type NiPSFacingQuadGenerator::TYPE("NiPSFacingQuadGenerator", &NiObject::TYPE );
 
-NiPSFacingQuadGenerator::NiPSFacingQuadGenerator() : unknown1((byte)0), unknown2((byte)0), unknown3((byte)0), unknown4((byte)0), unknown5((byte)0), unknown6((byte)0), unknown7((byte)0), unknown8((byte)0), unknown9((byte)0), unknown10((byte)0), unknown11((byte)0), unknown12((byte)0) {
+NiPSFacingQuadGenerator::NiPSFacingQuadGenerator() : unknown1((ubyte_t)0), unknown2((ubyte_t)0), unknown3((ubyte_t)0), unknown4((ubyte_t)0), unknown5((ubyte_t)0), unknown6((ubyte_t)0), unknown7((ubyte_t)0), unknown8((ubyte_t)0), unknown9((ubyte_t)0), unknown10((ubyte_t)0), unknown11((ubyte_t)0), unknown12((ubyte_t)0) {
 	//--BEGIN CONSTRUCTOR CUSTOM CODE--//
 
 	//--END CUSTOM CODE--//

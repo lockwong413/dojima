@@ -277,10 +277,10 @@ void NiTriBasedGeom::UpdateTangentSpace(int method) {
 
    if ( (niTriGeomData->GetTspaceFlag() & 0xF0) == 0 )
    {
-      // generate the byte data
+      // generate the ubyte_t data
       size_t vCount = verts.size();
       int fSize = sizeof(float[3]);
-      vector<byte> binData( 2 * vCount * fSize );
+      vector<ubyte_t> binData( 2 * vCount * fSize );
 
       for( unsigned i = 0; i < verts.size(); i++ ) {
          float tan_xyz[3], bin_xyz[3];

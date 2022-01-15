@@ -74,7 +74,7 @@ public:
 	//--END CUSTOM CODE--//
 protected:
 	/*! Unknown, Usually = 0. */
-	byte unknownByte;
+	ubyte_t unknownByte;
 	/*! The number of palette entries.  Always = 256. */
 	unsigned int numEntries;
 	/*! The color palette. */

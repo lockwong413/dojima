@@ -109,7 +109,7 @@ public:
 	//--END CUSTOM CODE--//
 protected:
 	/*! Unknown. */
-	byte unknown2;
+	ubyte_t unknown2;
 	/*! The target texture slot. */
 	TexType textureSlot;
 	/*! Determines how this controller animates the UV Coordinates. */

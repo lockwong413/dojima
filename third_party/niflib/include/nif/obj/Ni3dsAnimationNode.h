@@ -77,7 +77,7 @@ protected:
 	/*! A count. */
 	mutable unsigned int count;
 	/*! Unknown. */
-	vector< Niflib::array<5,byte > > unknownArray;
+	vector< Niflib::array<5,ubyte_t > > unknownArray;
 public:
 	/*! NIFLIB_HIDDEN function.  For internal use only. */
 	NIFLIB_HIDDEN virtual void Read( istream& in, list<unsigned int> & link_stack, const NifInfo & info );

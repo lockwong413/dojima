@@ -85,15 +85,15 @@ public:
 
 	/*!
 	* Get the shape's bounding volume code.  The code is specific to the Havok Physics engine.
-	* \return A byte vector containing the code representing the MOPP.
+	* \return A ubyte_t vector containing the code representing the MOPP.
 	*/
-	NIFLIB_API vector<byte> GetMoppCode() const;
+	NIFLIB_API vector<ubyte_t> GetMoppCode() const;
 
 	/*!
 	* Sets the shape's bounding volume code.  The code is specific to the Havok Physics engine.
-	* \param[in] value A byte vector containing the code representing the MOPP.
+	* \param[in] value A ubyte_t vector containing the code representing the MOPP.
 	*/
-	NIFLIB_API void SetMoppCode( vector<byte> & value );
+	NIFLIB_API void SetMoppCode( vector<ubyte_t> & value );
 
 	/*!
 	* Get the origin for the shape's mopp code in mopp coordinates. This is the minimum of all vertices in
@@ -159,7 +159,7 @@ protected:
 	/*! The shape's material. */
 	SkyrimHavokMaterial skyrimMaterial;
 	/*! Unknown bytes. */
-	Niflib::array<8,byte > unknown8Bytes;
+	Niflib::array<8,ubyte_t > unknown8Bytes;
 	/*! Unknown float, might be scale. */
 	float unknownFloat;
 	/*! Number of bytes for MOPP data. */
@@ -180,11 +180,11 @@ protected:
 	 * The tree of bounding volume data (old style, contains more than just the mopp
 	 * script).
 	 */
-	vector<byte > oldMoppData;
+	vector<ubyte_t > oldMoppData;
 	/*! Defines wether moppData is organized into chunks (PS3) or not (PC) */
 	MoppDataBuildType	buildType;
 	/*! The tree of bounding volume data. */
-	vector<byte > moppData;
+	vector<ubyte_t > moppData;
 
 public:
 	/*! NIFLIB_HIDDEN function.  For internal use only. */

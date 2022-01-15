@@ -63,7 +63,7 @@ protected:
 	/*! Collision Mode */
 	CollisionMode collisionMode;
 	/*! Use Alternate Bounding Volume. */
-	byte useAbv;
+	ubyte_t useAbv;
 	/*! Collision data. */
 	BoundingVolume boundingVolume;
 public:

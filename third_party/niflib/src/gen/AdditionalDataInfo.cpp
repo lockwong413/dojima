@@ -9,7 +9,7 @@ All rights reserved.  Please see niflib.h for license. */
 using namespace Niflib;
 
 //Constructor
-AdditionalDataInfo::AdditionalDataInfo() : dataType((int)0), numChannelBytesPerElement((int)0), numChannelBytes((int)0), numTotalBytesPerElement((int)0), blockIndex((int)0), channelOffset((int)0), unknownByte1((byte)2) {};
+AdditionalDataInfo::AdditionalDataInfo() : dataType((int)0), numChannelBytesPerElement((int)0), numChannelBytes((int)0), numTotalBytesPerElement((int)0), blockIndex((int)0), channelOffset((int)0), unknownByte1((ubyte_t)2) {};
 
 //Copy Constructor
 AdditionalDataInfo::AdditionalDataInfo( const AdditionalDataInfo & src ) {

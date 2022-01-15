@@ -21,7 +21,7 @@ using namespace Niflib;
 //Definition of TYPE constant
 const Type hkPackedNiTriStripsData::TYPE("hkPackedNiTriStripsData", &bhkShapeCollection::TYPE );
 
-hkPackedNiTriStripsData::hkPackedNiTriStripsData() : numTriangles((unsigned int)0), numVertices((unsigned int)0), unknownByte1((byte)0), numSubShapes((unsigned short)0) {
+hkPackedNiTriStripsData::hkPackedNiTriStripsData() : numTriangles((unsigned int)0), numVertices((unsigned int)0), unknownByte1((ubyte_t)0), numSubShapes((unsigned short)0) {
 	//--BEGIN CONSTRUCTOR CUSTOM CODE--//
 	//--END CUSTOM CODE--//
 }

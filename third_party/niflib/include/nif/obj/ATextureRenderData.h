@@ -75,16 +75,16 @@ protected:
 	/*! 0xff000000 (for 32bpp) or 0x00000000 (for 24bpp and 8bpp) */
 	unsigned int alphaMask;
 	/*! Bits per pixel, 0 (?), 8, 24 or 32. */
-	byte bitsPerPixel;
+	ubyte_t bitsPerPixel;
 	/*! Zero? */
-	Niflib::array<3,byte > unknown3Bytes;
+	Niflib::array<3,ubyte_t > unknown3Bytes;
 	/*!
 	 * [96,8,130,0,0,65,0,0] if 24 bits per pixel
 	 *             [129,8,130,32,0,65,12,0] if 32 bits per pixel
 	 *             [34,0,0,0,0,0,0,0] if 8 bits per pixel
 	 *             [4,0,0,0,0,0,0,0] if 0 (?) bits per pixel
 	 */
-	Niflib::array<8,byte > unknown8Bytes;
+	Niflib::array<8,ubyte_t > unknown8Bytes;
 	/*! Seems to always be zero. */
 	unsigned int unknownInt;
 	/*! Unknown.  Could be reference pointer. */
@@ -92,11 +92,11 @@ protected:
 	/*! Seems to always be zero. */
 	unsigned int unknownInt3;
 	/*! Flags */
-	byte flags;
+	ubyte_t flags;
 	/*! Unkown. Often zero. */
 	unsigned int unknownInt4;
 	/*! Unknown. */
-	byte unknownByte1;
+	ubyte_t unknownByte1;
 	/*! Channel Data */
 	Niflib::array<4,ChannelData > channels;
 	/*! Link to NiPalette, for 8-bit textures. */

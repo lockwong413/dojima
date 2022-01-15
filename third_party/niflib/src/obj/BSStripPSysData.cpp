@@ -20,7 +20,7 @@ using namespace Niflib;
 //Definition of TYPE constant
 const Type BSStripPSysData::TYPE("BSStripPSysData", &NiPSysData::TYPE );
 
-BSStripPSysData::BSStripPSysData() : unknownShort5((short)0), unknownByte6((byte)0), unknownInt7((int)0), unknownFloat8(0.0f) {
+BSStripPSysData::BSStripPSysData() : unknownShort5((short)0), unknownByte6((ubyte_t)0), unknownInt7((int)0), unknownFloat8(0.0f) {
 	//--BEGIN CONSTRUCTOR CUSTOM CODE--//
 
 	//--END CUSTOM CODE--//

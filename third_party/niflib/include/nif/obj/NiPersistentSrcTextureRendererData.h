@@ -69,7 +69,7 @@ protected:
 	 * Raw pixel data holding the mipmaps.  Mipmap zero is the full-size texture and
 	 * they get smaller by half as the number increases.
 	 */
-	vector< vector<byte > > pixelData;
+	vector< vector<ubyte_t > > pixelData;
 public:
 	/*! NIFLIB_HIDDEN function.  For internal use only. */
 	NIFLIB_HIDDEN virtual void Read( istream& in, list<unsigned int> & link_stack, const NifInfo & info );

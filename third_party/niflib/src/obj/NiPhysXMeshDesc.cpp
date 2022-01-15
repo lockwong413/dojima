@@ -20,7 +20,7 @@ using namespace Niflib;
 //Definition of TYPE constant
 const Type NiPhysXMeshDesc::TYPE("NiPhysXMeshDesc", &NiObject::TYPE );
 
-NiPhysXMeshDesc::NiPhysXMeshDesc() : unknownShort1((short)0), unknownFloat1(0.0f), unknownShort2((short)0), unknownByte1((byte)0), unknownFloat2(0.0f), unknownInt1((int)0), unknownInt2((int)0), numVertices((int)0), unknownInt4((int)0), unknownByte2((byte)0) {
+NiPhysXMeshDesc::NiPhysXMeshDesc() : unknownShort1((short)0), unknownFloat1(0.0f), unknownShort2((short)0), unknownByte1((ubyte_t)0), unknownFloat2(0.0f), unknownInt1((int)0), unknownInt2((int)0), numVertices((int)0), unknownInt4((int)0), unknownByte2((ubyte_t)0) {
 	//--BEGIN CONSTRUCTOR CUSTOM CODE--//
 
 	//--END CUSTOM CODE--//

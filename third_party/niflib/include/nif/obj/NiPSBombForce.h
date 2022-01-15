@@ -60,7 +60,7 @@ protected:
 	/*! Unknown. */
 	IndexString name;
 	/*! Unknown. */
-	byte unknown1;
+	ubyte_t unknown1;
 	/*! Unknown. */
 	int unknown2;
 	/*! Unknown. */

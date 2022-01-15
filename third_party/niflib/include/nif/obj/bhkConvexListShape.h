@@ -106,7 +106,7 @@ protected:
 	/*! Unknown. Set to (0.0,0.0,-0.0,0.0,0.0,-0.0), where -0.0 is 0x80000000 in hex. */
 	Niflib::array<6,float > unknownFloats;
 	/*! Unknown Flag */
-	byte unknownByte1;
+	ubyte_t unknownByte1;
 	/*! Unknown Flag */
 	float unknownFloat1;
 public:

@@ -78,7 +78,7 @@ protected:
 	/*! Unknown. */
 	float unkownFloat4;
 	/*! Unknown. */
-	byte unkownByte5;
+	ubyte_t unkownByte5;
 	/*! Unknown. */
 	int unkownInt6;
 	/*! Unknown. */
@@ -86,7 +86,7 @@ protected:
 	/*! Unknown. */
 	int unkownInt8;
 	/*! Unknown. */
-	byte unkownByte9;
+	ubyte_t unkownByte9;
 public:
 	/*! NIFLIB_HIDDEN function.  For internal use only. */
 	NIFLIB_HIDDEN virtual void Read( istream& in, list<unsigned int> & link_stack, const NifInfo & info );

@@ -20,7 +20,7 @@ using namespace Niflib;
 //Definition of TYPE constant
 const Type NiParticlesData::TYPE("NiParticlesData", &NiGeometryData::TYPE );
 
-NiParticlesData::NiParticlesData() : numParticles((unsigned short)0), particleRadius(0.0f), hasRadii(false), numActive((unsigned short)0), hasSizes(false), hasRotations(false), unknownByte1((byte)0), unknownLink(NULL), hasRotationAngles(false), hasRotationAxes(false), hasUvQuadrants(false), numUvQuadrants((byte)0), unknownByte2((byte)0) {
+NiParticlesData::NiParticlesData() : numParticles((unsigned short)0), particleRadius(0.0f), hasRadii(false), numActive((unsigned short)0), hasSizes(false), hasRotations(false), unknownByte1((ubyte_t)0), unknownLink(NULL), hasRotationAngles(false), hasRotationAxes(false), hasUvQuadrants(false), numUvQuadrants((ubyte_t)0), unknownByte2((ubyte_t)0) {
 	//--BEGIN CONSTRUCTOR CUSTOM CODE--//
 	//--END CUSTOM CODE--//
 }
@@ -132,7 +132,7 @@ void NiParticlesData::Write( ostream& out, const map<NiObjectRef,unsigned int> &
 	//--END CUSTOM CODE--//
 
 	NiGeometryData::Write( out, link_map, missing_link_stack, info );
-	numUvQuadrants = (byte)(uvQuadrants.size());
+	numUvQuadrants = (ubyte_t)(uvQuadrants.size());
 	if ( info.version <= 0x04000002 ) {
 		NifStream( numParticles, out, info );
 	};
@@ -232,7 +232,7 @@ std::string NiParticlesData::asString( bool verbose ) const {
 	stringstream out;
 	unsigned int array_output_count = 0;
 	out << NiGeometryData::asString();
-	numUvQuadrants = (byte)(uvQuadrants.size());
+	numUvQuadrants = (ubyte_t)(uvQuadrants.size());
 	out << "  Num Particles:  " << numParticles << endl;
 	out << "  Particle Radius:  " << particleRadius << endl;
 	out << "  Has Radii:  " << hasRadii << endl;

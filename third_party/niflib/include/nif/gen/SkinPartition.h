@@ -66,7 +66,7 @@ struct SkinPartition {
 	/*! Do we have bone indices? */
 	bool hasBoneIndices;
 	/*! Bone indices, they index into 'Bones'. */
-	vector< vector<byte > > boneIndices;
+	vector< vector<ubyte_t > > boneIndices;
 	/*! Unknown */
 	unsigned short unknownShort;
 	/*! Unknown. */

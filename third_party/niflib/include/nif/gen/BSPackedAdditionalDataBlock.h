@@ -42,7 +42,7 @@ struct BSPackedAdditionalDataBlock {
 	 */
 	vector<int > atomSizes;
 	/*! Unknown */
-	vector<byte > data;
+	vector<ubyte_t > data;
 	/*! Unknown. */
 	int unknownInt1;
 	/*!

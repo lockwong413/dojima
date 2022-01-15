@@ -20,7 +20,7 @@ using namespace Niflib;
 //Definition of TYPE constant
 const Type BSDebrisNode::TYPE("BSDebrisNode", &NiNode::TYPE );
 
-BSDebrisNode::BSDebrisNode() : unknownByte1((byte)0), unknownShort2((short)0) {
+BSDebrisNode::BSDebrisNode() : unknownByte1((ubyte_t)0), unknownShort2((short)0) {
 	//--BEGIN CONSTRUCTOR CUSTOM CODE--//
 
 	//--END CUSTOM CODE--//
@@ -75,7 +75,7 @@ std::string BSDebrisNode::asString( bool verbose ) const {
 
 	stringstream out;
 	out << NiNode::asString();
-	out << "  Unknown byte 1:  " << unknownByte1 << endl;
+	out << "  Unknown ubyte_t 1:  " << unknownByte1 << endl;
 	out << "  Unknown Short 2:  " << unknownShort2 << endl;
 	return out.str();
 

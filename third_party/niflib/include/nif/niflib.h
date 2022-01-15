@@ -272,14 +272,14 @@ NIFLIB_API list< Ref<NiNode> > ListAncestors( NiAVObject * leaf );
 NIFLIB_API bool IsSupportedVersion( unsigned int version );
 
 /*!
- * Parses a version string and returns the equivalent version as a byte-packed integer.
+ * Parses a version string and returns the equivalent version as a ubyte_t-packed integer.
  * \param[in] version The version number of the NIF format to parse in string format.
  * \return The version in integer format or VER_INVALID if the version string is not in the correct format.
  */
 NIFLIB_API unsigned ParseVersionString( string version );
 
 /*!
- * Takes a NIF version in byte-packed integer format and returns a formatted human-
+ * Takes a NIF version in ubyte_t-packed integer format and returns a formatted human-
  * readable string.  For example, 0x04000002 returns the string "4.0.0.2"
  * \param[in] version The NIF version in integer form.
  * \return The equivalent string representation of the version number.

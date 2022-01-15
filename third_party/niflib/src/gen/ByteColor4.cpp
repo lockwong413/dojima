@@ -9,7 +9,7 @@ All rights reserved.  Please see niflib.h for license. */
 using namespace Niflib;
 
 //Constructor
-ByteColor4::ByteColor4() : r((byte)0), g((byte)0), b((byte)0), a((byte)0) {};
+ByteColor4::ByteColor4() : r((ubyte_t)0), g((ubyte_t)0), b((ubyte_t)0), a((ubyte_t)0) {};
 
 //Copy Constructor
 ByteColor4::ByteColor4( const ByteColor4 & src ) {

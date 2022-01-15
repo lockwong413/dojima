@@ -20,7 +20,7 @@ using namespace Niflib;
 //Definition of TYPE constant
 const Type NiPSysData::TYPE("NiPSysData", &NiRotatingParticlesData::TYPE );
 
-NiPSysData::NiPSysData() : hasUnknownFloats3(false), unknownShort1((unsigned short)0), unknownShort2((unsigned short)0), hasSubtextureOffsetUvs(false), numSubtextureOffsetUvs((unsigned int)0), aspectRatio(0.0f), unknownInt4((unsigned int)0), unknownInt5((unsigned int)0), unknownInt6((unsigned int)0), unknownShort3((unsigned short)0), unknownByte4((byte)0) {
+NiPSysData::NiPSysData() : hasUnknownFloats3(false), unknownShort1((unsigned short)0), unknownShort2((unsigned short)0), hasSubtextureOffsetUvs(false), numSubtextureOffsetUvs((unsigned int)0), aspectRatio(0.0f), unknownInt4((unsigned int)0), unknownInt5((unsigned int)0), unknownInt6((unsigned int)0), unknownShort3((unsigned short)0), unknownByte4((ubyte_t)0) {
 	//--BEGIN CONSTRUCTOR CUSTOM CODE--//
 	//--END CUSTOM CODE--//
 }

@@ -19,7 +19,7 @@ using namespace Niflib;
 //Definition of TYPE constant
 const Type NiBlendBoolInterpolator::TYPE("NiBlendBoolInterpolator", &NiBlendInterpolator::TYPE );
 
-NiBlendBoolInterpolator::NiBlendBoolInterpolator() : boolValue((byte)0) {
+NiBlendBoolInterpolator::NiBlendBoolInterpolator() : boolValue((ubyte_t)0) {
 	//--BEGIN CONSTRUCTOR CUSTOM CODE--//
 	//--END CUSTOM CODE--//
 }
@@ -96,11 +96,11 @@ std::list<NiObject *> NiBlendBoolInterpolator::GetPtrs() const {
 
 //--BEGIN MISC CUSTOM CODE--//
 
-byte NiBlendBoolInterpolator::GetBoolValue() const {
+ubyte_t NiBlendBoolInterpolator::GetBoolValue() const {
 	return boolValue;
 }
 
-void NiBlendBoolInterpolator::SetBoolValue( byte value ) {
+void NiBlendBoolInterpolator::SetBoolValue( ubyte_t value ) {
 	boolValue = value;
 }
 

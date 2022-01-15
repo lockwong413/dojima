@@ -21,7 +21,7 @@ using namespace Niflib;
 //Definition of TYPE constant
 const Type NiSourceTexture::TYPE("NiSourceTexture", &NiTexture::TYPE );
 
-NiSourceTexture::NiSourceTexture() : useExternal((byte)1), unknownLink(NULL), unknownByte((byte)1), pixelData(NULL), pixelLayout((PixelLayout)PIX_LAY_PALETTISED_4), useMipmaps((MipMapFormat)MIP_FMT_DEFAULT), alphaFormat((AlphaFormat)ALPHA_DEFAULT), isStatic((byte)1), directRender(1), persistRenderData(0) {
+NiSourceTexture::NiSourceTexture() : useExternal((ubyte_t)1), unknownLink(NULL), unknownByte((ubyte_t)1), pixelData(NULL), pixelLayout((PixelLayout)PIX_LAY_PALETTISED_4), useMipmaps((MipMapFormat)MIP_FMT_DEFAULT), alphaFormat((AlphaFormat)ALPHA_DEFAULT), isStatic((ubyte_t)1), directRender(1), persistRenderData(0) {
 	//--BEGIN CONSTRUCTOR CUSTOM CODE--//
 	//--END CUSTOM CODE--//
 }

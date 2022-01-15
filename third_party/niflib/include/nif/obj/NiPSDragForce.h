@@ -62,7 +62,7 @@ protected:
 	/*! Unknown. */
 	int unknown2;
 	/*! Unknown. */
-	byte unknown3;
+	ubyte_t unknown3;
 	/*! Unknown. */
 	float unknown4;
 	/*! Unknown. */

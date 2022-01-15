@@ -20,7 +20,7 @@ using namespace Niflib;
 //Definition of TYPE constant
 const Type NiPSSimulatorMeshAlignStep::TYPE("NiPSSimulatorMeshAlignStep", &NiPSSimulatorStep::TYPE );
 
-NiPSSimulatorMeshAlignStep::NiPSSimulatorMeshAlignStep() : numRotationKeys((byte)0), rotationLoopBehavior((PSLoopBehavior)0) {
+NiPSSimulatorMeshAlignStep::NiPSSimulatorMeshAlignStep() : numRotationKeys((ubyte_t)0), rotationLoopBehavior((PSLoopBehavior)0) {
 	//--BEGIN CONSTRUCTOR CUSTOM CODE--//
 
 	//--END CUSTOM CODE--//
@@ -64,7 +64,7 @@ void NiPSSimulatorMeshAlignStep::Write( ostream& out, const map<NiObjectRef,unsi
 	//--END CUSTOM CODE--//
 
 	NiPSSimulatorStep::Write( out, link_map, missing_link_stack, info );
-	numRotationKeys = (byte)(rotationKeys.size());
+	numRotationKeys = (ubyte_t)(rotationKeys.size());
 	NifStream( numRotationKeys, out, info );
 	for (unsigned int i1 = 0; i1 < rotationKeys.size(); i1++) {
 		NifStream( rotationKeys[i1], out, info, 1 );
@@ -84,7 +84,7 @@ std::string NiPSSimulatorMeshAlignStep::asString( bool verbose ) const {
 	stringstream out;
 	unsigned int array_output_count = 0;
 	out << NiPSSimulatorStep::asString();
-	numRotationKeys = (byte)(rotationKeys.size());
+	numRotationKeys = (ubyte_t)(rotationKeys.size());
 	out << "  Num Rotation Keys:  " << numRotationKeys << endl;
 	array_output_count = 0;
 	for (unsigned int i1 = 0; i1 < rotationKeys.size(); i1++) {
