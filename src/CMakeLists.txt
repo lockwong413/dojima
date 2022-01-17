@@ -3,12 +3,12 @@
 # -----------------------------------------------------------------------------
 
 # Framework (library).
-list(APPEND FrameworkSources
-  api/dummy.cc
-)
+# list(APPEND FrameworkSources
+#   api/dummy.cc
+# )
 
 # Sample (executable).
-list(APPEND SampleSources
+list(APPEND AppSources
   main.cc
 )
 
@@ -22,7 +22,7 @@ list(APPEND SampleSources
 
 # Sample Target (executable).
 set(AppTarget nif2gltf)
-add_executable(${AppTarget} ${SampleSources})
+add_executable(${AppTarget} ${AppSources})
 target_link_libraries(${AppTarget} ${FrameworkTarget})
 
 # -----------------------------------------------------------------------------
