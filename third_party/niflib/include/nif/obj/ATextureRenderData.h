@@ -62,6 +62,13 @@ public:
 
 	//--BEGIN MISC CUSTOM CODE--//
 
+	NIFLIB_API uint32_t GetRedMask() const { return redMask; }
+	NIFLIB_API uint32_t GetGreenMask() const { return greenMask; }
+	NIFLIB_API uint32_t GetBlueMask() const { return blueMask; }
+	NIFLIB_API uint32_t GetAlphaMask() const { return alphaMask; }	
+
+	NIFLIB_API uint32_t GetNumMipMaps() const { return numMipmaps; }	
+
 	//--END CUSTOM CODE--//
 protected:
 	/*! The format of the pixels in this internally stored image. */
