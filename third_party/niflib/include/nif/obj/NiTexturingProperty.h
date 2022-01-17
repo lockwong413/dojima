@@ -61,10 +61,12 @@ public:
 	inline NIFLIB_API bool HasBaseTexture() const { return hasBaseTexture; }
 	inline NIFLIB_API bool HasDetailTexture() const { return hasDetailTexture; }
 	inline NIFLIB_API bool HasNormalTexture() const { return hasNormalTexture; }
+	inline NIFLIB_API bool HasGlossTexture() const { return hasGlossTexture; }
 
 	inline NIFLIB_API TexDesc const & GetBaseTexture() const { return baseTexture; }
 	inline NIFLIB_API TexDesc const & GetDetailTexture() const { return detailTexture; }
 	inline NIFLIB_API TexDesc const & GetNormalTexture() const { return normalTexture; }
+	inline NIFLIB_API TexDesc const & GetGlossTexture() const { return glossTexture; }
 
 
 	/*! 
