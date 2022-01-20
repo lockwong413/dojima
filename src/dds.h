@@ -96,6 +96,8 @@ struct DDS {
   static constexpr uint32_t kMagicNumber{ MakeFourCC("DDS ") };
   static_assert( DDS::kMagicNumber == 0x20534444 );
   
+  static constexpr size_t kCompressedDataOffset{ sizeof(kMagicNumber) + sizeof(Header) };
+
   static constexpr size_t kPixelFormatSize{ sizeof(PixelFormat) };
   static constexpr PixelFormat kDXT1{ kPixelFormatSize, DDPF_FOURCC, MakeFourCC("DXT1"), 0, 0, 0, 0, 0 };
   static constexpr PixelFormat kDXT3{ kPixelFormatSize, DDPF_FOURCC, MakeFourCC("DXT3"), 0, 0, 0, 0, 0 };
