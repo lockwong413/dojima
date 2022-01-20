@@ -3,7 +3,7 @@
 
 # ⚒ Dojima
 
-**Dojima** is a command line tool to convert data files from the game « _Way of the Samurai 4_ » from the NetImmerse / Gamebryo `NIF` format to `glTF 2.0`.
+**Dojima** is a command line tool to convert NetImmerse / Gamebryo `NIF` files from the game « _Way of the Samurai 4_ » to `glTF 2.0`.
 
 #### Features
 
@@ -20,17 +20,13 @@
 ```bash
 # Clone the project.
 git clone https://github.com/tcoppex/dojima
-cd dojima
-
-# Create a build directory.
-mkdir BUILD && cd BUILD
 
 # Compile using Ninja as generator (optional).
-cmake .. -GNinja -DCMAKE_BUILD_TYPE=Release
-cmake --build .
+cmake dojima -B BUILD/dojima -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake --build BUILD/dojima
 
 # Run the cli converter.
-#../bin/nif2gltf /path/to/wots4/Common/Character/Model/Pack/Dog01.nif
+#./dojima/bin/nif2gltf $WOTS4_PATH/Common/Character/Model/Pack/Dojima01.nif
 ```
 
 ### Acknowledgment
@@ -39,12 +35,10 @@ Dojima is shipped with modified versions of its third parties in accordance to t
 respective license. They are :
 
 * [niflib](https://github.com/niftools/niflib) : library for nif IO. 
-* [tinygltf](https://github.com/syoyo/tinygltf) : library for glTF 2.0 IO.
-* [stb_image](https://github.com/nothings/stb) : image loading/decoding from file/memory.
-* [json.hpp](https://github.com/nlohmann/json) : JSON for Modern C++.
+* [tinygltf](https://github.com/syoyo/tinygltf) : library for glTF 2.0 IO (*using [stb_image](https://github.com/nothings/stb) and [json.hpp](https://github.com/nlohmann/json)*).
 * [half.hpp](http://half.sourceforge.net/) : Half-precision floating-point library.
 
-`ACQUIRE`'s _Way of the Samurai 4_ can be acquired from steam [here](https://store.steampowered.com/app/312780/Way_of_the_Samurai_4/).
+`ACQUIRE's Way of the Samurai 4` can be acquired from steam [here](https://store.steampowered.com/app/312780/Way_of_the_Samurai_4/).
 
 ### Unlicense
 
