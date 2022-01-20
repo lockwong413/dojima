@@ -13,11 +13,6 @@ if(POLICY CMP0048)
   cmake_policy(SET CMP0048 NEW)
 endif()
 
-# Force OpenGL_GL_PREFERENCE to be set to GLVND (GL3+) instead of LEGACY (GL2).
-if(POLICY CMP0072)
-  cmake_policy(SET CMP0072 NEW)
-endif()
-
 # Use <PackageName>_ROOT variables.
 if(POLICY CMP0074)
   cmake_policy(SET CMP0074 NEW)
@@ -245,8 +240,8 @@ if(USE_GCC OR USE_CLANG)
   list(APPEND CXX_FLAGS_DEBUG
     -O0 
     -g3 
-    -Wundef
-    #-Wconversion
+    # -Wundef
+    # -Wconversion
   )
   list(APPEND CXX_FLAGS_RELEASE
     -O2
@@ -323,8 +318,8 @@ endif()
 # -----------------------------------------------------------------------------
 
 # Defines LIBM_LIBRARIES for mathematics when needed.
-# helpers_findLibM()
-# list(APPEND CustomLibs ${LIBM_LIBRARIES})
+helpers_findLibM()
+list(APPEND CustomLibs ${LIBM_LIBRARIES})
 
 # OpenMP.
 if(OPT_USE_OPENMP)
@@ -335,6 +330,7 @@ if(OPT_USE_OPENMP)
   endif()
 endif()
 
+# Niflib
 if(TRUE)
   set(NIFLIB_ROOT ${PROJECT_THIRD_PARTY_DIR}/niflib)
   
