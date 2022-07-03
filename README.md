@@ -37,6 +37,7 @@ respective license. They are :
 * [niflib](https://github.com/niftools/niflib) : library for nif IO. 
 * [tinygltf](https://github.com/syoyo/tinygltf) : library for glTF 2.0 IO (*using [stb_image](https://github.com/nothings/stb) and [json.hpp](https://github.com/nlohmann/json)*).
 * [half.hpp](http://half.sourceforge.net/) : Half-precision floating-point library.
+* [s3tc](https://github.com/Benjamin-Dobell/s3tc-dxt-decompression) : Routines for DXT1/DXT5 decompression.
 
 `ACQUIRE's Way of the Samurai 4` can be acquired from steam [here](https://store.steampowered.com/app/312780/Way_of_the_Samurai_4/).
 

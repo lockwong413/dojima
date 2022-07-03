@@ -1,3 +1,20 @@
+// ----------------------------------------------------------------------------
+//
+// [ Roadmap - TODO ]
+//
+//      * Fix mesh attributes buffers to remove NIF's BINORMAL and
+//  recompute TANGENT to be true VEC4 (this will requiered to change bufferView and accessors too).
+//
+//      * Export materials with diffuse texture properly.
+//
+//      * Export normal textures.
+//
+//
+// Use a glTF validator to check errors and warnings.
+//  ( https://github.khronos.org/glTF-Validator/ )
+//
+// ----------------------------------------------------------------------------
+
 #include <cassert>
 #include <cstdlib>
 #include <cstddef>
@@ -31,6 +48,14 @@
 #include "nif/obj/NiMaterialProperty.h"
 #include "nif/obj/NiStencilProperty.h"
 
+// Convert float16 to float32.
+#include "half/half.hpp"
+using half_float::half;
+
+// Decompress DXT1/DXT5.
+#define S3TC_IMPLEMENTATION
+#include "s3tc/s3tc.h"
+
 // STB image.
 #define STBI_ONLY_PNG
 #define STBI_ONLY_JPEG
@@ -42,20 +67,9 @@
 #define TINYGLTF_IMPLEMENTATION
 #include "tinygltf/tiny_gltf.h"
 
-// Convert float16 to float32.
-#include "half/half.hpp"
-using half_float::half;
-
 #ifdef __GNUC__
 #pragma GCC diagnostic pop
 #endif
-
-// Build DDS file from DXT-compressed pixels buffer.
-// #include "dds.h"
-
-// Decompress DXT1 / DXT5.
-#define S3TC_IMPLEMENTATION
-#include "s3tc/s3tc.h"
 
 // ----------------------------------------------------------------------------
 
@@ -74,11 +88,11 @@ namespace {
 // Display NIF header information at loading.
 static constexpr bool kDisplayHeader = true;
 
-// Force the output filename to "out.gltf".
-static constexpr bool kDebugOutput = false;
+// Output external PNG for debugging.
+static constexpr bool kDebugOutputPNG = true; //
 
 // Output name for accessors.
-static constexpr bool kNameAccessors = false;
+static constexpr bool kNameAccessors = true;
 
 // glTF output options.
 static constexpr bool kGLTFEmbedImages = true;
@@ -98,6 +112,7 @@ static constexpr char kSystemPathSeparator{
 enum class BufferId : uint8_t {
   INDEX,
   VERTEX,
+  // IMAGE, //
 
   kCount
 };
@@ -106,10 +121,10 @@ enum class AttributeId : uint8_t {
   Position,
   Texcoord,
   Normal,
-  Binormal,
   Tangent,
   Joints,
   Weights,
+  Binormal, //
   
   kCount
 };
@@ -123,19 +138,15 @@ static std::string const kNiPixelDataKey{ "NiPixelData" };
 uint32_t GetPrimitiveType(Niflib::MeshPrimitiveType primType) {
   switch (primType) {
     case Niflib::MESH_PRIMITIVE_TRIANGLES:
-    // DOJIMA_LOG( "Primitive : Triangles" );
     return TINYGLTF_MODE_TRIANGLES;
 
     case Niflib::MESH_PRIMITIVE_TRISTRIPS:
-    // DOJIMA_LOG( "Primitive : Triangle Strips" );
     return TINYGLTF_MODE_TRIANGLE_STRIP;
 
     case Niflib::MESH_PRIMITIVE_LINESTRIPS:
-    // DOJIMA_LOG( "Primitive : LineStrips" );
     return TINYGLTF_MODE_LINE_STRIP;
     
     case Niflib::MESH_PRIMITIVE_POINTS:
-    // DOJIMA_LOG( "Primitive : Points" );
     return TINYGLTF_MODE_POINTS;
 
     default:
@@ -212,37 +223,38 @@ bool SetAttribute(Niflib::SemanticData cs, size_t accessorIndex, tinygltf::Primi
   if ((name == "POSITION") || (name == "POSITION_BP")) {
     prim->attributes["POSITION"] = accessorIndex;
     accessor->type = TINYGLTF_TYPE_VEC3;
-    accessor->normalized = false;
+    // [ should be defined for POSITION ]
+    // @see https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#accessors-bounds
+    // auto &min_values = accessor->minValues;
+    // min_values.resize(3);
+    // auto &max_values = accessor->maxValues;
+    // max_values.resize(3);
   } 
   else if ((name == "NORMAL") || (name == "NORMAL_BP")) {
     prim->attributes["NORMAL"] = accessorIndex;
     accessor->type = TINYGLTF_TYPE_VEC3;
-    accessor->normalized = true;
   } 
   else if (name == "TEXCOORD") {
     prim->attributes["TEXCOORD_" + suffix] = accessorIndex;
     accessor->type = TINYGLTF_TYPE_VEC2;
-    accessor->normalized = false;
   } 
   else if (name == "BLENDINDICES") {
     prim->attributes["JOINTS_" + suffix] = accessorIndex;
     accessor->type = TINYGLTF_TYPE_VEC4;
-    accessor->normalized = false;
   } 
   else if (name == "BLENDWEIGHT") {
     prim->attributes["WEIGHTS_" + suffix] = accessorIndex;
     accessor->type = TINYGLTF_TYPE_VEC4;
-    accessor->normalized = false;
   } 
+  // (invalid : glTF is expecting vec4 floating point for TANGENT where the buffer is vec3)
   else if ((name == "TANGENT") || (name == "TANGENT_BP")) {
     prim->attributes["TANGENT"] = accessorIndex;
     accessor->type = TINYGLTF_TYPE_VEC4;
-    accessor->normalized = true;
+    accessor->normalized = true; // (just here to prevent error display on validation)
   }
-  // (not natively supported by glTF)
+  // (not natively supported by glTF, here to prevent preprocessing the vertex buffer)
   else if ((name == "BINORMAL") || (name == "BINORMAL_BP")) {
-    prim->attributes["BINORMAL"] = accessorIndex;
-    accessor->normalized = true;
+    prim->attributes["_BINORMAL"] = accessorIndex;
   }
   else {
     DOJIMA_QUIET_LOG( "[Warning] " << __FUNCTION__ << " : " << name << " component not used." ); 
@@ -379,8 +391,13 @@ int main(int argc, char *argv[]) {
   //  the biggest files are float16 maps anyways we always allocate enough.
   verticesBytesize *= 2;
 
-  // Create the base Index & Vertex buffers object.
-  std::vector< tinygltf::Buffer > Buffers(static_cast<size_t>(BufferId::kCount));
+  // *Theorical* uncompressed total bytelength for images.
+  size_t constexpr kRawPixelsDefaultSize{ 4 * 1024 * 1024 }; //
+  size_t const kNumTextures{ getNumBlocks(kNiPixelDataKey) };
+  size_t const imagesBytesize = kRawPixelsDefaultSize * kNumTextures;
+
+  // Create the base glTF buffers.
+  std::vector<tinygltf::Buffer> Buffers(static_cast<size_t>(BufferId::kCount));
   
   auto &IndexBuffer = Buffers[(int)BufferId::INDEX];
   IndexBuffer.name = "Indices";
@@ -389,10 +406,16 @@ int main(int argc, char *argv[]) {
   auto &VertexBuffer = Buffers[(int)BufferId::VERTEX];
   VertexBuffer.name = "Vertices";
   VertexBuffer.data.reserve(verticesBytesize);
+
+  // (wip)
+  // auto &ImageBuffer = Buffers[(int)BufferId::IMAGE];
+  // ImageBuffer.name = "Images";
+  // ImageBuffer.data.reserve(imagesBytesize); //
   
   // Offset to current buffers' end, used to build buffer viewers.
   size_t indexBufferOffset = 0;
   size_t vertexBufferOffset = 0;
+  size_t imageBufferOffset = 0;
 
   // Retrieve the number of NIF mesh nodes.
   size_t const kNiMeshCount{ getNumBlocks(kNiMeshKey) };
@@ -410,7 +433,10 @@ int main(int argc, char *argv[]) {
 
   // Meshes buffers.
   std::vector<tinygltf::Mesh> Meshes( kNiMeshCount );
-  std::vector<tinygltf::BufferView> BufferViews( Buffers.size() * kNiMeshCount );
+  
+  // BufferViews buffers.
+  size_t const kNumBufferViews = Buffers.size() * kNiMeshCount; //
+  std::vector<tinygltf::BufferView> BufferViews( kNumBufferViews );
 
   // Submeshes buffers.
   size_t const kNumAttributes = static_cast<size_t>(AttributeId::kCount); // (might be lower)
@@ -434,21 +460,23 @@ int main(int argc, char *argv[]) {
   // -- Texture extraction helpers.
 
   // Textures buffers.
-  // (There are approximately 4 textures per mesh part or 1 per NiPixelData, but we don't
+  // (There are approximatively 4 textures per mesh part or 1 per NiPixelData, but we don't
   // use all of them).
-  size_t const kNumTextures{ getNumBlocks(kNiPixelDataKey) };
   std::vector<tinygltf::Image> Images;
   std::vector<tinygltf::Texture> Textures;
   Images.reserve( kNumTextures );
   Textures.reserve( kNumTextures );
 
-  // Link a texture's path/name to its Image/Texture index.
+  // Link a texture's path/name to its Image-Texture index.
   std::unordered_map< std::string, size_t > mapTextureNameToIndex;
+
+  // Buffer to convert DXT compressed texture to raw pixels.
+  std::vector<uint8_t> rawPixels(kRawPixelsDefaultSize);
 
   // Helper to build and uncompress DDS from compressed bytes.
   // DDS dds;
 
-  // Extract an internal DDS texture and set texture image buffers.
+  // [lambda] Extract an internal DDS texture and set texture image buffers.
   auto processInternalTexture{[&](Niflib::Ref<Niflib::NiPixelData> const& nifPixelData, std::string const& texFilename, size_t* texIndex) -> size_t {
     // Check the texture has not been loaded yet.
     if (auto it = mapTextureNameToIndex.find(texFilename); it != mapTextureNameToIndex.end()) {
@@ -457,15 +485,20 @@ int main(int argc, char *argv[]) {
       return true;
     }
 
-    if (Niflib::PX_FMT_DXT1 != nifPixelData->GetPixelFormat()) {
-      DOJIMA_QUIET_LOG( "Non DXT1 texture are not supported." );
+    auto const fmt = nifPixelData->GetPixelFormat(); 
+    if ((Niflib::PX_FMT_DXT1 != fmt) && 
+        (Niflib::PX_FMT_DXT5 != fmt)) {
+      DOJIMA_QUIET_LOG( texFilename << " [" << fmt << "] : non DXT1 / DXT5 textures are not supported yet." );
       return false;
     }
+    auto decompressDXT = (Niflib::PX_FMT_DXT1 == fmt) ? s3tc::DecompressDXT1 
+                                                      : s3tc::DecompressDXT5;
 
     // Add a new texture data.
     Images.push_back( tinygltf::Image() );
-    Textures.push_back( tinygltf::Texture() );
     auto &img = Images.back();
+    
+    Textures.push_back( tinygltf::Texture() );
     auto &tex = Textures.back();
 
     // Update the Texture LUT with the new image/texture index using its full name.
@@ -487,7 +520,6 @@ int main(int argc, char *argv[]) {
     img.bits = 8;
     img.pixel_type = TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE;
 
-    // ------------------
     // Transform the DDS compressed data to PNG for gltf 2.0 compatibility.
     {
       // (all mipmaps are flatten on the first level)
@@ -503,20 +535,48 @@ int main(int argc, char *argv[]) {
       // };
       // dds.build(levels, img.width, img.height, Niflib::PX_FMT_DXT1, mask, pixelBytes);
       
+      // Decompress the internal DDS texture.
       size_t const rowStride = img.component * img.width;
-      uint8_t *raw_pixels = new uint8_t[rowStride * img.height]{};
-      s3tc::DecompressDXT1(img.width, img.height, pixelBytes.data(), (uint32_t *)raw_pixels);
-      stbi_write_png((img.name + ".png").c_str(), img.width, img.height, img.component, raw_pixels, rowStride);
-      delete [] raw_pixels;
-    }
-    // ------------------
+      rawPixels.resize( rowStride * img.height );
+      decompressDXT(img.width, img.height, pixelBytes.data(), (uint32_t *)rawPixels.data());
 
-    // [ TODO : write the data internally. ]
-    // img.image;                   // std::vector<unsigned char> 
-    // img.bufferView;              // (required if no uri)
-    // img.mimeType = "image/png";  // (required if no uri)
-    // img.uri; 
-    // img.as_is = false; //
+      // if (Niflib::PX_FMT_DXT1 == fmt) {
+      //   s3tc::DecompressDXT1(img.width, img.height, pixelBytes.data(), (uint32_t *)rawPixels.data());
+      // } else if (Niflib::PX_FMT_DXT5 == fmt) {
+      //   s3tc::DecompressDXT5(img.width, img.height, pixelBytes.data(), (uint32_t *)rawPixels.data());
+      // }
+
+      // Save image as PNG.
+      if constexpr (kDebugOutputPNG) {
+        // (external)
+
+        std::string const uri{img.name + ".png"};
+        stbi_write_png(uri.c_str(), img.width, img.height, img.component, rawPixels.data(), rowStride);
+      } else {
+        // (internal)
+
+        auto pngToMemory{[](void *context, void *data, int size) -> void {
+          auto img = reinterpret_cast<tinygltf::Image*>(context);
+          auto pngBytes = reinterpret_cast<uint8_t const*>(data);  
+          img->image.clear();
+          img->image.insert(img->image.end(), pngBytes, pngBytes + size);
+        }};
+        int const writeSuccess{stbi_write_png_to_func(
+          pngToMemory, &img, img.width, img.height, img.component, rawPixels.data(), rowStride
+        )};
+
+        // [ TODO ] Fill internal image buffer.
+        if (writeSuccess) {
+          // auto& bufferView = BufferViews[current_buffer_view++];
+          // img.mimeType = "image/png";
+          // img.bufferView = current_buffer_view;
+          // bufferView.buffer = (int)BufferId::IMAGE;
+          // bufferView.byteOffset = imageBufferOffset;
+          // bufferView.byteLength = img.image.size();
+          // imageBufferOffset += bufferView.byteLength;
+        }
+      }
+    }
 
     // Set the texture to the textureMap.
     tex.sampler = 0; //
@@ -528,43 +588,23 @@ int main(int argc, char *argv[]) {
     return true;
   }};
 
-  // Wrapper for processInternalTexture using Niflib::TexDesc.
+  // [lambda] Wrapper for processInternalTexture using Niflib::TexDesc.
   // When the texture is available the texIndex is set and the function return true.
   auto processTexDesc{[processInternalTexture](Niflib::TexDesc const& texDesc, size_t* texIndex) -> bool {
-    if (nullptr == texDesc.source) {
+    auto srcTex = texDesc.source;
+    if (nullptr == srcTex) {
       return false;
     }
-
-    auto const& srcTex = texDesc.source;
     if (srcTex->IsTextureExternal()) {
-      DOJIMA_QUIET_LOG( "External texture are not supported." );
+      DOJIMA_QUIET_LOG( "[ Warning ] External texture loading is not supported." );
       return false;
     }
-
+    // [ TODO ]
     // Retrieve sampler from texdesc flag and samplerMap.
-    // todo
-
-    auto const& nifPixelData = srcTex->GetPixelData();
-    auto const& texFilename = srcTex->GetTextureFileName();    
-    return processInternalTexture(nifPixelData, texFilename, texIndex);
+    return processInternalTexture(srcTex->GetPixelData(), srcTex->GetTextureFileName(), texIndex);
   }};
 
   // -- Meshes
-
-  // ( notes on materials )
-  //  WotS NiMesh have the following properties :
-  //    * NiMaterialProperty (with non PBR values),
-  //    * NiAlphaProperty
-  //    * NiSpecularProperty
-  //    * NiVertexColorProperty
-  //    * NiTexturingProperty, with a varying number of NiSourceTexture, each with a NiPixelData :
-  //          + a Base texture (FMT_DXT3), seems useless.
-  //          + a Detail Texture (FMT_DXT1), a RGB(A) mask.
-  //          + a Normal Texture (FMT_DXT1).
-  //          + a Gloss Texture (FMT_DXT1).
-  //
-  //  After each root's "part" node a NiPixelData  is defined containing the 
-  //  diffuse texture (DXT1) for this part's mesh.
 
   // Associate a mesh name to its internal id.
   std::unordered_map<std::string, size_t> mapMeshNameToId;
@@ -579,14 +619,29 @@ int main(int argc, char *argv[]) {
     mesh.name = nifMesh->GetName();
     mapMeshNameToId[mesh.name] = mesh_id;
 
-    // Material.
     // ------------------------
+    // Material.
+    // 
+    //  WotS NiMesh have the following properties :
+    //    * NiMaterialProperty (with non PBR values),
+    //    * NiAlphaProperty
+    //    * NiSpecularProperty
+    //    * NiVertexColorProperty
+    //    * NiTexturingProperty, with a varying number of NiSourceTexture, each with a NiPixelData :
+    //          + a Base texture (FMT_DXT3), seems useless.
+    //          + a Detail Texture (FMT_DXT1), a RGB(A) mask.
+    //          + a Normal Texture (FMT_DXT1).
+    //          + a Gloss Texture (FMT_DXT1).
+    //
+    //  ( After each root's "part" node, a NiPixelData is defined containing the 
+    //   diffuse texture (DXT1) for this part's mesh )
+    // 
     size_t const meshMaterialIndex = current_material++; //
     auto &material = Materials[meshMaterialIndex];
     // material.name = mesh.name + "::material";
     
-    // (should probably use the specular or SpecularGlossiness extensions)
-    // https://kcoley.github.io/glTF/extensions/2.0/Khronos/KHR_materials_pbrSpecularGlossiness/
+    // Prefer using the specular or SpecularGlossiness extensions, see :
+    //   https://kcoley.github.io/glTF/extensions/2.0/Khronos/KHR_materials_pbrSpecularGlossiness/
     // if (auto prop = nifMesh->GetPropertyByType(Niflib::NiVertexColorProperty::TYPE); prop) {}
     // if (auto prop = nifMesh->GetPropertyByType(Niflib::NiSpecularProperty::TYPE); prop) {}
 
@@ -613,7 +668,7 @@ int main(int argc, char *argv[]) {
         break;
 
         case Niflib::NiAlphaProperty::TF_GREATER:
-          // (weirdly, some body parts have this flag for no clear reason
+          // (weirdly, some body parts have this flag set for no clear reasons,
           // should we discard them ?)
         case Niflib::NiAlphaProperty::TF_GEQUAL:
           material.alphaMode = "MASK";
@@ -630,7 +685,7 @@ int main(int argc, char *argv[]) {
     // Check for double sided geometry.
     if (auto prop = nifMesh->GetPropertyByType(Niflib::NiStencilProperty::TYPE); prop) {
       auto stencilProp = Niflib::StaticCast<Niflib::NiStencilProperty>(prop);
-      material.doubleSided = (stencilProp->GetFaceDrawMode() == Niflib::DRAW_BOTH);
+      material.doubleSided = (Niflib::DRAW_BOTH == stencilProp->GetFaceDrawMode());
     }
 
     // Image / Texture.    
@@ -640,7 +695,7 @@ int main(int argc, char *argv[]) {
 
       // Normal Texture.
       if (processTexDesc(texProp->GetNormalTexture(), &texIndex)) {
-        material.normalTexture.index = texIndex;
+        // material.normalTexture.index = texIndex;
       }
       
       // "Specular" Texture.
@@ -812,54 +867,57 @@ int main(int argc, char *argv[]) {
     totalNodeCount += (ptr != nullptr) ? 1 : 0;
   }
 
-  std::vector< tinygltf::Node > Nodes;
+  std::vector<tinygltf::Node> Nodes;
   Nodes.reserve(totalNodeCount);
 
-  // Define a recursive lambda function to fill the node hierarchy.
-  std::function<void(tinygltf::Node*const, Niflib::NiAVObject *const)> fillNodes;
-  
-  fillNodes = [&mapMeshNameToId, &Nodes, &fillNodes](tinygltf::Node *const parent, Niflib::NiAVObject *const nifAVO) -> void {
-    // Get a reference to a new node.
-    Nodes.push_back( tinygltf::Node() );
-    auto &node = Nodes.back();
-    
-    // Set it as its parent's children.
-    if (parent) {
-      int const nodeIndex = static_cast<int>(Nodes.size()) - 1;
-      parent->children.push_back(nodeIndex);
-    }
+  // [lambda] recursive function to fill the node hierarchy.
+  std::function<void(tinygltf::Node*const, Niflib::NiAVObject *const)> fillNodes{
+    [&mapMeshNameToId, &Nodes, &fillNodes](tinygltf::Node *const parent, Niflib::NiAVObject *const nifAVO) -> void {
+      // [ test, skip empty nodes ]
+      // if (auto nifMesh = Niflib::DynamicCast<Niflib::NiMesh>(nifAVO); !nifMesh) {
+      //   return;
+      // }
 
-    node.name = nifAVO->GetName();
-
-    auto const& qRotation = nifAVO->GetLocalRotation().AsQuaternion();
-    node.rotation = { (double)qRotation.x, (double)qRotation.y, (double)qRotation.z, (double)qRotation.w };
-
-    auto const fScale = static_cast<double>(nifAVO->GetLocalScale());
-    node.scale = { fScale, fScale, fScale };
-
-    auto const &vTranslation = nifAVO->GetLocalTranslation();
-    node.translation = { (double)vTranslation.x, (double)vTranslation.y, (double)vTranslation.z };
-
-    if (auto nifMesh = Niflib::DynamicCast<Niflib::NiMesh>(nifAVO); nifMesh) {
-      node.mesh = mapMeshNameToId[node.name];
-    }
-
-    // TODO
-    // Detect meshLOD node (nifSwitchNode).
-    // if (auto nifSwitchNode = Niflib::DynamicCast<Niflib::NiSwitchNode>(nifAVO); nifSwitchNode) {}
-
-    // TODO
-    // Handle extra datas.
-    // auto const& listXD = nifAVO->GetExtraData();
-    // node.extras;  
-
-    // Continue processing if the nif object is a pure node (and not only a leaf).
-    if (auto nifNode = Niflib::DynamicCast<Niflib::NiNode>(nifAVO); nifNode) {
-      if (nifNode->IsSkeletonRoot()) {
-        // node.skin;
+      // Get a reference to a new node.
+      Nodes.push_back( tinygltf::Node() );
+      auto &node = Nodes.back();
+      
+      // Set it as its parent's children.
+      if (parent) {
+        int const nodeIndex = static_cast<int>(Nodes.size()) - 1;
+        parent->children.push_back(nodeIndex);
       }
-      for (auto &child : nifNode->GetChildren()) {
-        fillNodes(&node, child);
+
+      node.name = nifAVO->GetName();
+
+      auto const& qRotation = nifAVO->GetLocalRotation().AsQuaternion();
+      node.rotation = { (double)qRotation.x, (double)qRotation.y, (double)qRotation.z, (double)qRotation.w };
+
+      auto const fScale = static_cast<double>(nifAVO->GetLocalScale());
+      node.scale = { fScale, fScale, fScale };
+
+      auto const &vTranslation = nifAVO->GetLocalTranslation();
+      node.translation = { (double)vTranslation.x, (double)vTranslation.y, (double)vTranslation.z };
+
+      if (auto nifMesh = Niflib::DynamicCast<Niflib::NiMesh>(nifAVO); nifMesh) {
+        node.mesh = mapMeshNameToId[node.name];
+      }
+
+      // [ TODO ] Detect meshLOD node (nifSwitchNode).
+      // if (auto nifSwitchNode = Niflib::DynamicCast<Niflib::NiSwitchNode>(nifAVO); nifSwitchNode) {}
+
+      // [ TODO ] Handle extra datas.
+      // auto const& listXD = nifAVO->GetExtraData();
+      // node.extras;  
+
+      // Continue processing if the nif object is a pure node (and not only a leaf).
+      if (auto nifNode = Niflib::DynamicCast<Niflib::NiNode>(nifAVO); nifNode) {
+        if (nifNode->IsSkeletonRoot()) {
+          // node.skin;
+        }
+        for (auto &child : nifNode->GetChildren()) {
+          fillNodes(&node, child);
+        }
       }
     }
   };
@@ -873,7 +931,7 @@ int main(int argc, char *argv[]) {
   // Then for each NiStringExtraData, if the following object has a consecutive index
   // it contains the path for that part's data and is alternatively a NiNode or a NiPixelData.
   //
-  // The PixelData representing the DDS DXT1 diffuse texture for the mesh.
+  // The PixelData representing the DDS DXT1/5 diffuse texture for the mesh.
   //
 
   // Detects if the NIF file is a pack.
@@ -902,12 +960,12 @@ int main(int argc, char *argv[]) {
       if (auto nifString = Niflib::DynamicCast<Niflib::NiStringExtraData>(n0); nifString) {
         auto n1 = nifList[i+1];
         if (auto nifNode = Niflib::DynamicCast<Niflib::NiNode>(n1); nifNode && (nifNode->GetName() == "SceneNode")) {
-          nodeParts.push_back( {i, i+1} );
-          ++i; continue;
+          nodeParts.push_back( {i, ++i} );
+          continue;
         }
         if (auto nifPixelData = Niflib::DynamicCast<Niflib::NiPixelData>(n1); nifPixelData) {
-          pixelParts.push_back( {i, i+1} );
-          ++i; continue;
+          pixelParts.push_back( {i, ++i} );
+          continue;
         }
       }
     }
@@ -924,13 +982,13 @@ int main(int argc, char *argv[]) {
       auto texPathNode = Niflib::StaticCast<Niflib::NiStringExtraData>(nifList[pixelPart.path_id]);
       auto texPixelNode = Niflib::StaticCast<Niflib::NiPixelData>(nifList[pixelPart.data_id]);
       if (size_t texIndex; processInternalTexture(texPixelNode, texPathNode->GetData(), &texIndex)) {
+        // [ TODO ]
+        // Associate each meshes material diffuse texture with the one defined by
+        // their following upper texPixelNode (check with ID). 
+
         // auto &pbr = material.pbrMetallicRoughness;
         // pbr.baseColorTextureindex = -1;  // required.
-        // pbr.baseColorTexture.texCoord;
-
-        // TODO :
-        //  associate each meshes material diffuse texture with the one defined by
-        //  their following upper texPixelNode (check with ID). 
+        // pbr.baseColorTexture.texCoord; // (texcoord index)
       }
     }
   } else if (auto firstNode = Niflib::DynamicCast<Niflib::NiNode>(nifList[0]); firstNode) {
@@ -944,6 +1002,9 @@ int main(int argc, char *argv[]) {
   }
 
   // --------------
+
+  // std::cerr << "Nodes usage : " << Nodes.size() << " / " << Nodes.capacity() 
+  //           << std::endl;
 
   // Remove excess size (happens when meshes do not have joints attributes).
   Accessors.resize(current_accessor);
@@ -960,11 +1021,11 @@ int main(int argc, char *argv[]) {
     data.buffers = std::move( Buffers );
     data.nodes = std::move( Nodes );
 
-    if constexpr(true) {
+    if constexpr(false) {
       data.images = std::move( Images );
       data.textures = std::move( Textures );
+      data.samplers = std::move( Samplers );
     }
-    data.samplers = std::move( Samplers );
 
     //data.skins;
     //data.animations;
@@ -977,7 +1038,6 @@ int main(int argc, char *argv[]) {
   }
 
   std::string const gltfFilename{
-    (kDebugOutput) ? "out.gltf" :
     [](std::string s, std::string const& ext) -> std::string {
       return s.replace(
         s.begin() + s.find_last_of(".") + 1, 
