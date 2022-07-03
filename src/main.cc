@@ -56,6 +56,9 @@ using half_float::half;
 #define S3TC_IMPLEMENTATION
 #include "s3tc/s3tc.h"
 
+// Save DDS.
+#include "dds.h"
+
 // STB image.
 #define STBI_ONLY_PNG
 #define STBI_ONLY_JPEG
@@ -90,6 +93,7 @@ static constexpr bool kDisplayHeader = true;
 
 // Output external PNG for debugging.
 static constexpr bool kDebugOutputPNG = true; //
+static constexpr bool kDebugOutputDDS = false; //
 
 // Output name for accessors.
 static constexpr bool kNameAccessors = true;
@@ -474,135 +478,138 @@ int main(int argc, char *argv[]) {
   std::vector<uint8_t> rawPixels(kRawPixelsDefaultSize);
 
   // Helper to build and uncompress DDS from compressed bytes.
-  // DDS dds;
+  DDS dds;
 
   // [lambda] Extract an internal DDS texture and set texture image buffers.
-  auto processInternalTexture{[&](Niflib::Ref<Niflib::NiPixelData> const& nifPixelData, std::string const& texFilename, size_t* texIndex) -> size_t {
-    // Check the texture has not been loaded yet.
-    if (auto it = mapTextureNameToIndex.find(texFilename); it != mapTextureNameToIndex.end()) {
-      DOJIMA_QUIET_LOG(texFilename << " already loaded.");
-      *texIndex = it->second;
-      return true;
-    }
+  auto processInternalTexture{
+    [&](Niflib::Ref<Niflib::NiPixelData> const& nifPixelData, std::string const& texFilename, size_t* texIndex) -> size_t {
+      // Check the texture has not been loaded yet.
+      if (auto it = mapTextureNameToIndex.find(texFilename); it != mapTextureNameToIndex.end()) {
+        DOJIMA_QUIET_LOG(texFilename << " already loaded.");
+        *texIndex = it->second;
+        return true;
+      }
 
-    auto const fmt = nifPixelData->GetPixelFormat(); 
-    if ((Niflib::PX_FMT_DXT1 != fmt) && 
-        (Niflib::PX_FMT_DXT5 != fmt)) {
-      DOJIMA_QUIET_LOG( texFilename << " [" << fmt << "] : non DXT1 / DXT5 textures are not supported yet." );
-      return false;
-    }
-    auto decompressDXT = (Niflib::PX_FMT_DXT1 == fmt) ? s3tc::DecompressDXT1 
-                                                      : s3tc::DecompressDXT5;
+      auto const fmt = nifPixelData->GetPixelFormat(); 
+      if ((Niflib::PX_FMT_DXT1 != fmt) && 
+          (Niflib::PX_FMT_DXT5 != fmt)) {
+        DOJIMA_QUIET_LOG( texFilename << " [" << fmt << "] : non DXT1 / DXT5 textures are not supported yet." );
+        return false;
+      }
+      auto decompressDXT = (Niflib::PX_FMT_DXT1 == fmt) ? s3tc::DecompressDXT1 
+                                                        : s3tc::DecompressDXT5;
 
-    // Add a new texture data.
-    Images.push_back( tinygltf::Image() );
-    auto &img = Images.back();
-    
-    Textures.push_back( tinygltf::Texture() );
-    auto &tex = Textures.back();
-
-    // Update the Texture LUT with the new image/texture index using its full name.
-    *texIndex = Images.size() - 1;
-    mapTextureNameToIndex[texFilename] = *texIndex;
-
-    // Extract the texture's basename, removing its path and extension.
-    auto const texName{ 
-      [](std::string const& fn, size_t pos) -> std::string { 
-        size_t startIndex = (pos != std::string::npos) ? pos + 1 : 0;
-        return fn.substr(startIndex, fn.find_last_of('.')); 
-      }(texFilename, texFilename.find_last_of('/'))
-    };
-
-    img.name = texName;
-    img.width = static_cast<uint32_t>(nifPixelData->GetWidth());
-    img.height = static_cast<uint32_t>(nifPixelData->GetHeight());
-    img.component = 4;
-    img.bits = 8;
-    img.pixel_type = TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE;
-
-    // Transform the DDS compressed data to PNG for gltf 2.0 compatibility.
-    {
-      // (all mipmaps are flatten on the first level)
-      auto const& pixelBytes = nifPixelData->GetMipMaps()[0];
-
-      // [optional] Reconstruct the DDS file from data.
-      // uint32_t const levels = nifPixelData->GetNumMipMaps(); //
-      // uint32_t const mask[4]{ 
-      //   0x000000ff, // nifPixelData->GetRedMask(), 
-      //   0x0000ff00, // nifPixelData->GetGreenMask(), 
-      //   0x00ff0000, // nifPixelData->GetBlueMask(), 
-      //   0xff000000, // nifPixelData->GetAlphaMask(), 
-      // };
-      // dds.build(levels, img.width, img.height, Niflib::PX_FMT_DXT1, mask, pixelBytes);
+      // Add a new texture data.
+      Images.push_back( tinygltf::Image() );
+      auto &img = Images.back();
       
-      // Decompress the internal DDS texture.
-      size_t const rowStride = img.component * img.width;
-      rawPixels.resize( rowStride * img.height );
-      decompressDXT(img.width, img.height, pixelBytes.data(), (uint32_t *)rawPixels.data());
+      Textures.push_back( tinygltf::Texture() );
+      auto &tex = Textures.back();
 
-      // if (Niflib::PX_FMT_DXT1 == fmt) {
-      //   s3tc::DecompressDXT1(img.width, img.height, pixelBytes.data(), (uint32_t *)rawPixels.data());
-      // } else if (Niflib::PX_FMT_DXT5 == fmt) {
-      //   s3tc::DecompressDXT5(img.width, img.height, pixelBytes.data(), (uint32_t *)rawPixels.data());
-      // }
+      // Update the Texture LUT with the new image/texture index using its full name.
+      *texIndex = Images.size() - 1;
+      mapTextureNameToIndex[texFilename] = *texIndex;
 
-      // Save image as PNG.
-      if constexpr (kDebugOutputPNG) {
-        // (external)
+      // Extract the texture's basename, removing its path and extension.
+      auto const texName{ 
+        [](std::string const& fn, size_t pos) -> std::string { 
+          size_t startIndex = (pos != std::string::npos) ? pos + 1 : 0;
+          return fn.substr(startIndex, fn.find_last_of('.')); 
+        }(texFilename, texFilename.find_last_of('/'))
+      };
 
-        std::string const uri{img.name + ".png"};
-        stbi_write_png(uri.c_str(), img.width, img.height, img.component, rawPixels.data(), rowStride);
-      } else {
-        // (internal)
+      img.name = texName;
+      img.width = static_cast<uint32_t>(nifPixelData->GetWidth());
+      img.height = static_cast<uint32_t>(nifPixelData->GetHeight());
+      img.component = 4;
+      img.bits = 8;
+      img.pixel_type = TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE;
 
-        auto pngToMemory{[](void *context, void *data, int size) -> void {
-          auto img = reinterpret_cast<tinygltf::Image*>(context);
-          auto pngBytes = reinterpret_cast<uint8_t const*>(data);  
-          img->image.clear();
-          img->image.insert(img->image.end(), pngBytes, pngBytes + size);
-        }};
-        int const writeSuccess{stbi_write_png_to_func(
-          pngToMemory, &img, img.width, img.height, img.component, rawPixels.data(), rowStride
-        )};
+      // [note] Decompressing DXT to PNG might lose alpha channel information.
 
-        // [ TODO ] Fill internal image buffer.
-        if (writeSuccess) {
-          // auto& bufferView = BufferViews[current_buffer_view++];
-          // img.mimeType = "image/png";
-          // img.bufferView = current_buffer_view;
-          // bufferView.buffer = (int)BufferId::IMAGE;
-          // bufferView.byteOffset = imageBufferOffset;
-          // bufferView.byteLength = img.image.size();
-          // imageBufferOffset += bufferView.byteLength;
+      // Transform the DDS compressed data to PNG for gltf 2.0 compatibility.
+      {
+        // (all mipmaps are flatten on the first level)
+        auto const& pixelBytes = nifPixelData->GetMipMaps()[0];
+
+        // [optional] Reconstruct the DDS file from data.
+        if (kDebugOutputDDS) {
+          uint32_t const levels = nifPixelData->GetNumMipMaps(); //
+          uint32_t const mask[4]{ 
+            0x000000ff, // nifPixelData->GetRedMask(), 
+            0x0000ff00, // nifPixelData->GetGreenMask(), 
+            0x00ff0000, // nifPixelData->GetBlueMask(), 
+            0xff000000, // nifPixelData->GetAlphaMask(), 
+          };
+          dds.build(levels, img.width, img.height, fmt, mask, pixelBytes);
+          dds.save(std::string(img.name + ".dds"));
+        }
+
+        // Decompress the internal DDS texture.
+        size_t const rowStride = img.component * img.width;
+        rawPixels.resize( rowStride * img.height );
+        decompressDXT(img.width, img.height, pixelBytes.data(), (uint32_t *)rawPixels.data());
+
+        // Save image as PNG.
+        if constexpr (kDebugOutputPNG) {
+          // (external)
+
+          std::string const uri{img.name + ".png"};
+          stbi_write_png(uri.c_str(), img.width, img.height, img.component, rawPixels.data(), rowStride);
+        } else {
+          // (internal)
+
+          auto pngToMemory{[](void *context, void *data, int size) -> void {
+            auto img = reinterpret_cast<tinygltf::Image*>(context);
+            auto pngBytes = reinterpret_cast<uint8_t const*>(data);  
+            img->image.clear();
+            img->image.insert(img->image.end(), pngBytes, pngBytes + size);
+          }};
+          int const writeSuccess{stbi_write_png_to_func(
+            pngToMemory, &img, img.width, img.height, img.component, rawPixels.data(), rowStride
+          )};
+
+          // [ TODO ] Fill internal image buffer.
+          if (writeSuccess) {
+            // auto& bufferView = BufferViews[current_buffer_view++];
+            // img.mimeType = "image/png";
+            // img.bufferView = current_buffer_view;
+            // bufferView.buffer = (int)BufferId::IMAGE;
+            // bufferView.byteOffset = imageBufferOffset;
+            // bufferView.byteLength = img.image.size();
+            // imageBufferOffset += bufferView.byteLength;
+          }
         }
       }
+
+      // Set the texture to the textureMap.
+      tex.sampler = 0; //
+      tex.source = *texIndex;
+
+      // [ TODO ]
+      // Handle texture transforms.
+
+      return true;
     }
-
-    // Set the texture to the textureMap.
-    tex.sampler = 0; //
-    tex.source = *texIndex;
-
-    // [ TODO ]
-    // Handle texture transforms.
-
-    return true;
-  }};
+  }; // -- end processInternalTexture
 
   // [lambda] Wrapper for processInternalTexture using Niflib::TexDesc.
   // When the texture is available the texIndex is set and the function return true.
-  auto processTexDesc{[processInternalTexture](Niflib::TexDesc const& texDesc, size_t* texIndex) -> bool {
-    auto srcTex = texDesc.source;
-    if (nullptr == srcTex) {
-      return false;
+  auto processTexDesc{
+    [processInternalTexture](Niflib::TexDesc const& texDesc, size_t* texIndex) -> bool {
+      auto srcTex = texDesc.source;
+      if (nullptr == srcTex) {
+        return false;
+      }
+      if (srcTex->IsTextureExternal()) {
+        DOJIMA_QUIET_LOG( "[ Warning ] External texture loading is not supported." );
+        return false;
+      }
+      // [ TODO ]
+      // Retrieve sampler from texdesc flag and samplerMap.
+      return processInternalTexture(srcTex->GetPixelData(), srcTex->GetTextureFileName(), texIndex);
     }
-    if (srcTex->IsTextureExternal()) {
-      DOJIMA_QUIET_LOG( "[ Warning ] External texture loading is not supported." );
-      return false;
-    }
-    // [ TODO ]
-    // Retrieve sampler from texdesc flag and samplerMap.
-    return processInternalTexture(srcTex->GetPixelData(), srcTex->GetTextureFileName(), texIndex);
-  }};
+  };
 
   // -- Meshes
 
@@ -702,7 +709,7 @@ int main(int argc, char *argv[]) {
       // processTexDesc(texProp->GetGlossTexture(), &texIndex);
 
       // Some RGBA mask.
-      // processTexDesc(texProp->GetDetailTexture(), &texIndex);
+      processTexDesc(texProp->GetDetailTexture(), &texIndex);
     } 
     // ------------------------
 
