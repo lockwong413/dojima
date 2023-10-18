@@ -278,15 +278,27 @@ int main(int argc, char *argv[]) {
     return EXIT_FAILURE;
   }
   std::string const nifFilename{ argv[1] };
-  
+
+  // Create an outputs directory for the transformed NIF file.
+  std::string const outputDirectory{
+    [](std::string s) -> std::string {
+      return "_outputs" +
+             std::string(&kSystemPathSeparator) +
+             s.replace(s.begin() + s.find_last_of("."), s.end(), "")
+              .substr(s.find_last_of(kSystemPathSeparator) + 1) +
+             std::string(&kSystemPathSeparator);
+    }(nifFilename)
+  };
+  std::filesystem::create_directories(outputDirectory);
+
   // --------------
-  
-  // Retrieve blocks / structure informations from the NIF header. 
+
+  // Retrieve blocks / structure informations from the NIF header.
   Niflib::Header nifHeader = Niflib::ReadHeader(nifFilename);
 
   // Block type names.
   auto const &blockTypes = nifHeader.getBlockTypes();
-  
+
   // Type index of each blocks.
   auto const &blockTypeIndex = nifHeader.getBlockTypeIndex();
 
@@ -535,14 +547,14 @@ int main(int argc, char *argv[]) {
         // [optional] Reconstruct the DDS file from data.
         if (kDebugOutputDDS) {
           uint32_t const levels = nifPixelData->GetNumMipMaps(); //
-          uint32_t const mask[4]{ 
-            0x000000ff, // nifPixelData->GetRedMask(), 
-            0x0000ff00, // nifPixelData->GetGreenMask(), 
-            0x00ff0000, // nifPixelData->GetBlueMask(), 
-            0xff000000, // nifPixelData->GetAlphaMask(), 
+          uint32_t const mask[4]{
+            0x000000ff, // nifPixelData->GetRedMask(),
+            0x0000ff00, // nifPixelData->GetGreenMask(),
+            0x00ff0000, // nifPixelData->GetBlueMask(),
+            0xff000000, // nifPixelData->GetAlphaMask(),
           };
           dds.build(levels, img.width, img.height, fmt, mask, pixelBytes);
-          dds.save(std::string(img.name + ".dds"));
+          dds.save(std::string(outputDirectory + img.name + ".dds"));
         }
 
         // Decompress the internal DDS texture.
@@ -554,14 +566,14 @@ int main(int argc, char *argv[]) {
         if constexpr (kDebugOutputPNG) {
           // (external)
 
-          std::string const uri{img.name + ".png"};
+          std::string const uri{outputDirectory + img.name + ".png"};
           stbi_write_png(uri.c_str(), img.width, img.height, img.component, rawPixels.data(), rowStride);
         } else {
           // (internal)
 
           auto pngToMemory{[](void *context, void *data, int size) -> void {
             auto img = reinterpret_cast<tinygltf::Image*>(context);
-            auto pngBytes = reinterpret_cast<uint8_t const*>(data);  
+            auto pngBytes = reinterpret_cast<uint8_t const*>(data);
             img->image.clear();
             img->image.insert(img->image.end(), pngBytes, pngBytes + size);
           }};
@@ -1047,16 +1059,16 @@ int main(int argc, char *argv[]) {
   std::string const gltfFilename{
     [](std::string s, std::string const& ext) -> std::string {
       return s.replace(
-        s.begin() + s.find_last_of(".") + 1, 
-        s.end(), 
+        s.begin() + s.find_last_of(".") + 1,
+        s.end(),
         ext
       ).substr(s.find_last_of(kSystemPathSeparator) + 1);
     }(nifFilename, kGLTFWriteBinary ? "glb" : "gltf")
   };
 
   if (tinygltf::TinyGLTF gltf; !gltf.WriteGltfSceneToFile(
-      &data, gltfFilename, kGLTFEmbedImages, kGLTFEmbedBuffers, kGLTFPrettyPrint, kGLTFWriteBinary
-    )) 
+      &data, outputDirectory + gltfFilename, kGLTFEmbedImages, kGLTFEmbedBuffers, kGLTFPrettyPrint, kGLTFWriteBinary
+    ))
   {
     DOJIMA_LOG( "[Error] glTF file writing failed." );
     return EXIT_FAILURE;
