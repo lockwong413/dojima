@@ -889,8 +889,10 @@ int main(int argc, char *argv[]) {
 
   // -- Node hierarchy.
 
+  bool const kUseRootNode = true;
+
   // Determine the total number of hierarchical nodes.
-  size_t totalNodeCount = 0;
+  size_t totalNodeCount = kUseRootNode ? 1 : 0;
   for (auto const& n : nifList) {
     auto ptr = Niflib::DynamicCast<Niflib::NiAVObject>(n);
     totalNodeCount += (ptr != nullptr) ? 1 : 0;
@@ -898,6 +900,13 @@ int main(int argc, char *argv[]) {
 
   std::vector<tinygltf::Node> Nodes;
   Nodes.reserve(totalNodeCount);
+  tinygltf::Node *root_node_ptr = nullptr;
+
+  if (kUseRootNode) {
+    Nodes.push_back({});
+    root_node_ptr = &Nodes[0];
+    root_node_ptr->name = "root";
+  }
 
   // [lambda] recursive function to fill the node hierarchy.
   std::function<void(tinygltf::Node*const, Niflib::NiAVObject *const)> fillNodes{
