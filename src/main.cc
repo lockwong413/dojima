@@ -1020,7 +1020,8 @@ int main(int argc, char *argv[]) {
       // Geometry.
       auto const nodeId = nodeParts[i].data_id;
       auto upperNode = Niflib::StaticCast<Niflib::NiNode>(nifList[nodeId]);
-      fillNodes(nullptr, upperNode);
+      
+      fillNodes(root_node_ptr, upperNode); //
 
       // Diffuse texture.
       auto const pixelPart = pixelParts[i];
