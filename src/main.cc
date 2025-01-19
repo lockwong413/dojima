@@ -48,6 +48,8 @@
 #include "nif/obj/NiAlphaProperty.h"
 #include "nif/obj/NiMaterialProperty.h"
 #include "nif/obj/NiStencilProperty.h"
+#include "nif/obj/NiVertexColorProperty.h"
+#include "nif/obj/NiSpecularProperty.h"
 
 // Convert float16 to float32.
 #include "half/half.hpp"
@@ -850,13 +852,15 @@ int main(int argc, char *argv[]) {
           auto &acc = Accessors[prim.indices];
           size_t const byteSize = SetAccessorFormat(formats[0], &acc);
 
-          if (kNameAccessors) acc.name = "INDEX";
+          if (kNameAccessors) {
+            acc.name = "INDEX";
+          }
           acc.bufferView = bufferViewIndex;
           acc.normalized = false;
           acc.byteOffset = region.startIndex * byteSize;
           acc.count = region.numIndices;
         } else {
-          // -- Vertices
+          // -- Vertex attributes
 
           size_t vertexBaseOffset = region.startIndex * bufferView.byteStride;
           for (int comp_id = 0; comp_id < md.numComponents; ++comp_id) {
@@ -872,7 +876,9 @@ int main(int argc, char *argv[]) {
             // Set the primitive attribute accessor.
             SetAttribute(sem, accessorIndex, &prim, &acc);
 
-            if (kNameAccessors) acc.name = sem.name;
+            if (kNameAccessors) {
+              acc.name = sem.name;
+            }
             acc.bufferView = bufferViewIndex;
             acc.byteOffset = vertexBaseOffset;
             acc.count = region.numIndices;
