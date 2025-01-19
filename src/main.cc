@@ -225,6 +225,8 @@ bool SetAttribute(Niflib::SemanticData cs, size_t accessorIndex, tinygltf::Primi
   std::string const& name = cs.name;
   std::string const suffix{std::to_string(cs.index)};
 
+  // DOJIMA_QUIET_LOG( "setting attribute " << name );
+
   if ((name == "POSITION") || (name == "POSITION_BP")) {
     prim->attributes["POSITION"] = accessorIndex;
     accessor->type = TINYGLTF_TYPE_VEC3;
@@ -357,6 +359,8 @@ int main(int argc, char *argv[]) {
       std::cerr << "      + " << bti << " " << bt << " [" << blockTypeCount[bti] << "], \n";
       ++bti;
     }
+
+    std::cerr << " * Theorical mesh count : " << getNumBlocks("NiColorExtraData") / 3 << std::endl;
   }
 
   // --------------
@@ -818,6 +822,7 @@ int main(int argc, char *argv[]) {
         break;
 
         default:
+            DOJIMA_QUIET_LOG( "[Warning] unused DataStreamUsage found ." );
         break;
       };
 
@@ -976,10 +981,12 @@ int main(int argc, char *argv[]) {
   uint32_t numSubParts = 0u;
   if (auto firstNode = Niflib::DynamicCast<Niflib::NiIntegerExtraData>(nifList[0]); firstNode) {
     numSubParts = firstNode->GetData() / 2u;
+    DOJIMA_QUIET_LOG( "Detected Nif subparts : " << numSubParts );
   }
 
   if (bool const bNIFPack = (numSubParts > 0u); bNIFPack) {
     // -- NIF Pack.
+    DOJIMA_QUIET_LOG(">> nif pack");
 
     struct PartIndices_t {
       int path_id = -1; // index to a NiStringExtraData containing a path.
@@ -1031,6 +1038,8 @@ int main(int argc, char *argv[]) {
     }
   } else if (auto firstNode = Niflib::DynamicCast<Niflib::NiNode>(nifList[0]); firstNode) {
     // -- NIF Part.
+    DOJIMA_QUIET_LOG(">> nif part");
+
     fillNodes(nullptr, firstNode);
   } else if (auto firstNode = Niflib::DynamicCast<Niflib::NiPixelData>(nifList[0]); firstNode) {
     // -- NIF PixelData.
