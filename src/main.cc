@@ -31,6 +31,7 @@
 #pragma GCC diagnostic ignored "-Wignored-qualifiers"
 #pragma GCC diagnostic ignored "-Wtype-limits"
 #pragma GCC diagnostic ignored "-Wuseless-cast"
+#pragma GCC diagnostic ignored "-Wdeprecated-copy"
 #endif
 
 // NIF importer.
@@ -410,7 +411,7 @@ int main(int argc, char *argv[]) {
   // *Theorical* uncompressed total bytelength for images.
   size_t constexpr kRawPixelsDefaultSize{ 4 * 1024 * 1024 }; //
   size_t const kNumTextures{ getNumBlocks(kNiPixelDataKey) };
-  size_t const imagesBytesize = kRawPixelsDefaultSize * kNumTextures;
+  // size_t const imagesBytesize = kRawPixelsDefaultSize * kNumTextures;
 
   // Create the base glTF buffers.
   std::vector<tinygltf::Buffer> Buffers(static_cast<size_t>(BufferId::kCount));
@@ -431,7 +432,7 @@ int main(int argc, char *argv[]) {
   // Offset to current buffers' end, used to build buffer viewers.
   size_t indexBufferOffset = 0;
   size_t vertexBufferOffset = 0;
-  size_t imageBufferOffset = 0;
+  // size_t imageBufferOffset = 0;
 
   // Retrieve the number of NIF mesh nodes.
   size_t const kNiMeshCount{ getNumBlocks(kNiMeshKey) };
@@ -554,7 +555,7 @@ int main(int argc, char *argv[]) {
             0xff000000, // nifPixelData->GetAlphaMask(),
           };
           dds.build(levels, img.width, img.height, fmt, mask, pixelBytes);
-          dds.save(std::string(outputDirectory + img.name + ".dds"));
+          dds.save(outputDirectory + img.name + ".dds");
         }
 
         // Decompress the internal DDS texture.
