@@ -1026,8 +1026,14 @@ int main(int argc, char *argv[]) {
       // Geometry.
       auto const nodeId = nodeParts[i].data_id;
       auto upperNode = Niflib::StaticCast<Niflib::NiNode>(nifList[nodeId]);
-      
+
+      // ---------------
+      /* XXX Questionnable hack to bypass 2 'useless' nodes XXX */
+      if (auto child1 = Niflib::DynamicCast<Niflib::NiNode>(upperNode->GetChildren()[0]); child1) {
+        upperNode = Niflib::DynamicCast<Niflib::NiNode>(child1->GetChildren()[1]);
+      }
       fillNodes(root_node_ptr, upperNode); //
+      // ---------------
 
       // Diffuse texture.
       auto const pixelPart = pixelParts[i];
