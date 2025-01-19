@@ -658,12 +658,21 @@ int main(int argc, char *argv[]) {
     //
     size_t const meshMaterialIndex = current_material++; //
     auto &material = Materials[meshMaterialIndex];
-    // material.name = mesh.name + "::material";
+    material.name = mesh.name + "_mat_" + std::to_string(meshMaterialIndex); //
 
-    // Prefer using the specular or SpecularGlossiness extensions, see :
+    //
+    // [TODO]
+    // Prefer using the specular or SpecularGlossiness GLTF extensions, rather
+    // than pbrMetallicRoughness. See :
     //   https://kcoley.github.io/glTF/extensions/2.0/Khronos/KHR_materials_pbrSpecularGlossiness/
-    // if (auto prop = nifMesh->GetPropertyByType(Niflib::NiVertexColorProperty::TYPE); prop) {}
-    // if (auto prop = nifMesh->GetPropertyByType(Niflib::NiSpecularProperty::TYPE); prop) {}
+    //
+
+    // if (auto prop = nifMesh->GetPropertyByType(Niflib::NiSpecularProperty::TYPE); prop) {
+    //   DOJIMA_QUIET_LOG( material.name << ": A specular property was detected but not used." );
+    // }
+    // if (auto prop = nifMesh->GetPropertyByType(Niflib::NiVertexColorProperty::TYPE); prop) {
+    //   DOJIMA_QUIET_LOG( material.name << ": A vertex color property was detected but not used." );
+    // }
 
     // Basic / non-PBR parameters.
     if (auto prop = nifMesh->GetPropertyByType(Niflib::NiMaterialProperty::TYPE); prop) {
