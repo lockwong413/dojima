@@ -1,33 +1,16 @@
 # -----------------------------------------------------------------------------
-# Sources.
-# -----------------------------------------------------------------------------
 
-# Framework (library).
-# list(APPEND FrameworkSources
-#   api/dummy.cc
-# )
+set(TARGET nif2gltf)
+add_executable(${TARGET}
+  # main.cc
+  wots3.cc
+)
 
-# Sample (executable).
-list(APPEND AppSources
-  main.cc
+list(APPEND Targets
+  ${TARGET}
 )
 
 # -----------------------------------------------------------------------------
-# Target properties and build parameters.
-# -----------------------------------------------------------------------------
-
-# Framework Target (library).
-# set(FrameworkTarget ${CMAKE_PROJECT_NAME})
-# add_library(${FrameworkTarget} ${PROJECT_LIB_TYPE} ${FrameworkSources})
-
-# Sample Target (executable).
-set(AppTarget nif2gltf)
-add_executable(${AppTarget} ${AppSources})
-target_link_libraries(${AppTarget} ${FrameworkTarget})
-
-# -----------------------------------------------------------------------------
-
-list(APPEND Targets ${FrameworkTarget} ${AppTarget})
 
 # Set generic target properties.
 foreach(target ${Targets})
