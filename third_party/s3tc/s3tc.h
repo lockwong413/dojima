@@ -156,7 +156,7 @@ void DecompressBlockDXT1(uint32_t x, uint32_t y, uint32_t width, uint8_t const* 
             finalColor = PackRGBA((r0+r1)/2, (g0+g1)/2, (b0+b1)/2, 255);
           break;
           case 3:
-            finalColor = PackRGBA(0, 0, 0, 255);
+            finalColor = PackRGBA(0, 0, 0, 0);
           break;
         }
       }
