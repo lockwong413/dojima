@@ -386,17 +386,23 @@ int main(int argc, char *argv[]) {
   auto const& triStripsIndices = getTypeListIndices( "NiTriStrips" );
   auto const& triStripsDataIndices = getTypeListIndices( "NiTriStripsData" );
 
-  assert( triStripsIndices.size() == triStripsDataIndices.size() );
+  // > TODO !!!
+  // (Not always the case, it seems data can be shared between tristrip)
+  // (would not reworking on bufferView / accessors )
+  // assert( triStripsIndices.size() == triStripsDataIndices.size() );
 
   uint32_t const kNumMeshes = triStripsIndices.size();
   uint32_t const kNumBuffers = static_cast<uint32_t>(BufferId::kCount);
   uint32_t const kNumPrimitives{ [&](){
     uint32_t total = 0u;
     for (uint mesh_id = 0; mesh_id < kNumMeshes; ++mesh_id) {
+      auto const nifGeo = Niflib::StaticCast<Niflib::NiTriStrips>(
+        nifList.at(triStripsIndices.at(mesh_id))
+      );
       auto const meshStripData{
-        Niflib::StaticCast<Niflib::NiTriStripsData>(nifList[triStripsDataIndices.at(mesh_id)])
+        Niflib::StaticCast<Niflib::NiTriStripsData>(nifGeo->GetData())
       };
-      total += meshStripData->GetStripCount();
+      total += meshStripData->GetStripCount(); // XXX (should not be count twice with shared data)
     }
     return total;
   }() };
@@ -447,7 +453,7 @@ int main(int argc, char *argv[]) {
     auto &mesh = data.meshes.at(mesh_id);
 
     auto const nifGeo = Niflib::StaticCast<Niflib::NiTriStrips>(
-      nifList[triStripsIndices[mesh_id]]
+      nifList.at(triStripsIndices.at(mesh_id))
     );
 
     // Name.
@@ -483,9 +489,12 @@ int main(int argc, char *argv[]) {
 
     // Handle primitives.
     {
-      auto const meshStripData = Niflib::StaticCast<Niflib::NiTriStripsData>(
-        nifList[triStripsDataIndices.at(mesh_id)]
-      );
+      // auto const meshStripData = Niflib::StaticCast<Niflib::NiTriStripsData>(
+      //   nifList[triStripsDataIndices.at(mesh_id)]
+      // );
+      auto const meshStripData{
+        Niflib::StaticCast<Niflib::NiTriStripsData>(nifGeo->GetData())
+      };
 
       uint32_t const numPrimitives = meshStripData->GetStripCount();
       mesh.primitives.resize(numPrimitives); //
