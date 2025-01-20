@@ -361,8 +361,11 @@ int main(int argc, char *argv[]) {
       std::cerr << "      + " << bti << " " << bt << " [" << blockTypeCount[bti] << "], \n";
       ++bti;
     }
+  }
 
+  if (nifHeader.getVersion() == 0x1e10003) {
     std::cerr << " * Theorical mesh count : " << getNumBlocks("NiColorExtraData") / 3 << std::endl;
+
   }
 
   // --------------
@@ -900,7 +903,18 @@ int main(int argc, char *argv[]) {
 
   // -- Node hierarchy.
 
-  bool const kUseRootNode = true;
+  std::vector<tinygltf::Node> Nodes{};
+  tinygltf::Node *root_node_ptr = nullptr;
+
+  // Detects if the NIF file is a pack.
+  uint32_t numSubParts = 0u;
+  if (auto firstNode = Niflib::DynamicCast<Niflib::NiIntegerExtraData>(nifList[0]); firstNode) {
+    numSubParts = firstNode->GetData() / 2u;
+    DOJIMA_QUIET_LOG( "Detected Nif subparts : " << numSubParts );
+  }
+
+  // (only use a common root on NifPack)
+  bool kUseRootNode = (numSubParts > 0u);
 
   // Determine the total number of hierarchical nodes.
   size_t totalNodeCount = kUseRootNode ? 1 : 0;
@@ -909,15 +923,14 @@ int main(int argc, char *argv[]) {
     totalNodeCount += (ptr != nullptr) ? 1 : 0;
   }
 
-  std::vector<tinygltf::Node> Nodes;
   Nodes.reserve(totalNodeCount);
-  tinygltf::Node *root_node_ptr = nullptr;
 
   if (kUseRootNode) {
     Nodes.push_back({});
     root_node_ptr = &Nodes[0];
     root_node_ptr->name = "root";
   }
+
 
   // [lambda] recursive function to fill the node hierarchy.
   std::function<void(tinygltf::Node*const, Niflib::NiAVObject *const)> fillNodes{
@@ -971,7 +984,6 @@ int main(int argc, char *argv[]) {
     }
   };
 
-
   // (on NIF's "Characters Pack")
   //
   //  The first node is a "NiIntegerExtraData" and contains the number of
@@ -982,14 +994,6 @@ int main(int argc, char *argv[]) {
   //
   // The PixelData representing the DDS DXT1/5 diffuse texture for the mesh.
   //
-
-  // Detects if the NIF file is a pack.
-  uint32_t numSubParts = 0u;
-  if (auto firstNode = Niflib::DynamicCast<Niflib::NiIntegerExtraData>(nifList[0]); firstNode) {
-    numSubParts = firstNode->GetData() / 2u;
-    DOJIMA_QUIET_LOG( "Detected Nif subparts : " << numSubParts );
-  }
-
   if (bool const bNIFPack = (numSubParts > 0u); bNIFPack) {
     // -- NIF Pack.
     DOJIMA_QUIET_LOG(">> nif pack");
@@ -1029,11 +1033,15 @@ int main(int argc, char *argv[]) {
 
       // ---------------
       /* XXX Questionnable hack to bypass 2 'useless' nodes XXX */
-      if (auto child1 = Niflib::DynamicCast<Niflib::NiNode>(upperNode->GetChildren()[0]); child1) {
-        upperNode = Niflib::DynamicCast<Niflib::NiNode>(child1->GetChildren()[1]);
+      if constexpr (true) {
+        if (auto child1 = Niflib::DynamicCast<Niflib::NiNode>(upperNode->GetChildren()[0]); child1) {
+          // (This bypass its sibbling node, probably useful for rigging)
+          upperNode = Niflib::DynamicCast<Niflib::NiNode>(child1->GetChildren()[1]);
+        }
       }
-      fillNodes(root_node_ptr, upperNode); //
       // ---------------
+
+      fillNodes(root_node_ptr, upperNode); //
 
       // Diffuse texture.
       auto const pixelPart = pixelParts[i];
