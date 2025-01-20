@@ -386,9 +386,13 @@ int main(int argc, char *argv[]) {
   auto const& triStripsIndices = getTypeListIndices( "NiTriStrips" );
   auto const& triStripsDataIndices = getTypeListIndices( "NiTriStripsData" );
 
-  // > TODO !!!
-  // (Not always the case, it seems data can be shared between tristrip)
-  // (would not reworking on bufferView / accessors )
+  // > TODO
+  // The first version was made as if triStripsIndices size matched triStripsDataIndices
+  // size, while the later instances can be shared by multiple instance of the former.
+  //
+  // Therefore the current bufferView (/ accessors ?) count is incorrect as we
+  // need to share bufferViews per niTriStripsData instances.
+  //
   // assert( triStripsIndices.size() == triStripsDataIndices.size() );
 
   uint32_t const kNumMeshes = triStripsIndices.size();
