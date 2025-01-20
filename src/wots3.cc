@@ -102,7 +102,7 @@ static constexpr bool kNameAccessors = true;
 static constexpr bool kGLTFEmbedImages = true;
 static constexpr bool kGLTFEmbedBuffers = true;
 static constexpr bool kGLTFPrettyPrint = true;
-static constexpr bool kGLTFWriteBinary = false;
+static constexpr bool kGLTFWriteBinary = false; // Error when using Data URI in GLB container.
 
 // OS specific path separator.
 static constexpr char kSystemPathSeparator{
@@ -136,9 +136,6 @@ enum class AttributeId : uint8_t {
 
 // NIF node keys of interest.
 static std::string const kNiPixelDataKey{ "NiPixelData" };
-// static std::string const kNiSourceTextureKey{ "NiSourceTexture" };
-// static std::string const kNiDataStreamKey{ "NiDataStream" };
-// static std::string const kNiMeshKey{ "NiMesh" };
 
 uint32_t GetPrimitiveType(Niflib::MeshPrimitiveType primType) {
   switch (primType) {
@@ -276,32 +273,11 @@ bool SetAttribute(Niflib::SemanticData cs, size_t accessorIndex, tinygltf::Primi
 // ----------------------------------------------------------------------------
 
 int main(int argc, char *argv[]) {
-#if 0
-
-  std::string const nifFilename{
-    "../DATA/Way of the Samurai 3/Common/"
-
-    // "Item/mdl/"
-    // "ac_zingasa.nif" // 6 tri strips
-    // "ac_makimono.nif" // 2 tri strips
-    // "ac_zyuzu.nif" // 1 tri strips
-
-    "Map/Scene/S3_syukuba_01/S3_syukuba_01_d.nif" // 25 tri strips
-  };
-
-
-
-  DOJIMA_QUIET_LOG( " >>> FORCED FILENAME :" << nifFilename );
-
-#else
-
   if (argc < 2) {
     DOJIMA_LOG( "Usage : " << std::endl << argv[0] << " nif_file" );
     return EXIT_FAILURE;
   }
   std::string const nifFilename{ argv[1] };
-
-#endif
 
   // --------------------------------------------
 
@@ -377,8 +353,8 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  if (nifHeader.getVersion() == 0x1e10003) {
-    std::cerr << " [Error] This version only read Way Of The Samurai 3 Nif file." << std::endl;
+  if (nifHeader.getVersion() != 0x14030009) {
+    std::cerr << " [Error] This version only support \"Way Of The Samurai 3\" Nif files." << std::endl;
     exit(-1);
   }
 
@@ -426,7 +402,7 @@ int main(int argc, char *argv[]) {
   size_t indexBufferOffset = 0;
   size_t vertexBufferOffset = 0;
   size_t texcoordBufferOffset = 0;
-  size_t imageBufferOffset = 0;
+  // size_t imageBufferOffset = 0;
 
   // *Theorical* uncompressed total bytelength for images.
   size_t constexpr kRawPixelsDefaultSize{ 4 * 1024 * 1024 }; //
@@ -503,7 +479,7 @@ int main(int argc, char *argv[]) {
     [&](Niflib::Ref<Niflib::NiPixelData> const& nifPixelData, std::string const& texFilename, size_t* texIndex) -> size_t {
       // Check the texture has not been loaded yet.
       if (auto it = mapTextureNameToIndex.find(texFilename); it != mapTextureNameToIndex.end()) {
-        DOJIMA_QUIET_LOG(texFilename << " already loaded.");
+        // DOJIMA_QUIET_LOG(texFilename << " already loaded.");
         *texIndex = it->second;
         return true;
       }
@@ -542,8 +518,6 @@ int main(int argc, char *argv[]) {
       img.component = 4;
       img.bits = 8;
       img.pixel_type = TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE;
-
-      // [note] Decompressing DXT to PNG might lose alpha channel information.
 
       // Transform the DDS compressed data to PNG for gltf 2.0 compatibility.
       {
