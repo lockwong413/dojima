@@ -9,7 +9,7 @@
 
 - [x] mesh hierarchy (*Characters*),
 - [x] float16 buffers (*Maps, Items, Accessories & Weapons*),
-- [ ] materials,
+- [x] materials,
 - [ ] bones,
 - [ ] skeletal animation,
 - [ ] facial animation,

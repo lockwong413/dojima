@@ -95,7 +95,7 @@ namespace {
 static constexpr bool kDisplayHeader = true;
 
 // Output external PNG for debugging.
-static constexpr bool kDebugOutputPNG = true; //
+static constexpr bool kDebugOutputPNG = false; //
 static constexpr bool kDebugOutputDDS = false; //
 
 // Output name for accessors.
@@ -467,7 +467,7 @@ int main(int argc, char *argv[]) {
   // Submeshes buffers.
   size_t const kNumAttributes = static_cast<size_t>(AttributeId::kCount); // (might be lower)
   size_t constexpr kNumAccessorPerSubmesh{ 1 + kNumAttributes };
-  std::vector<tinygltf::Accessor> Accessors( totalSubmeshesCount * kNumAccessorPerSubmesh );
+  std::vector<tinygltf::Accessor> Accessors( totalSubmeshesCount * kNumAccessorPerSubmesh ); // ..
 
   // Materials buffer.
   // Depends on textures, MaterialData & NiMaterialProperty.
@@ -572,35 +572,17 @@ int main(int argc, char *argv[]) {
         rawPixels.resize( rowStride * img.height );
         decompressDXT(img.width, img.height, pixelBytes.data(), (uint32_t *)rawPixels.data());
 
+        std::string const uri{outputDirectory + img.name + ".png"};
+
         // Save image as PNG.
         if constexpr (kDebugOutputPNG) {
-          // (external)
-
-          std::string const uri{outputDirectory + img.name + ".png"};
           stbi_write_png(uri.c_str(), img.width, img.height, img.component, rawPixels.data(), rowStride);
-        } else {
+        }
+
+        {
           // (internal)
-
-          auto pngToMemory{[](void *context, void *data, int size) -> void {
-            auto img = reinterpret_cast<tinygltf::Image*>(context);
-            auto pngBytes = reinterpret_cast<uint8_t const*>(data);
-            img->image.clear();
-            img->image.insert(img->image.end(), pngBytes, pngBytes + size);
-          }};
-          int const writeSuccess{stbi_write_png_to_func(
-            pngToMemory, &img, img.width, img.height, img.component, rawPixels.data(), rowStride
-          )};
-
-          // [ TODO ] Fill internal image buffer.
-          if (writeSuccess) {
-            // auto& bufferView = BufferViews[current_buffer_view++];
-            // img.mimeType = "image/png";
-            // img.bufferView = current_buffer_view;
-            // bufferView.buffer = (int)BufferId::IMAGE;
-            // bufferView.byteOffset = imageBufferOffset;
-            // bufferView.byteLength = img.image.size();
-            // imageBufferOffset += bufferView.byteLength;
-          }
+          img.uri = uri; //
+          img.image.insert(img.image.begin(), rawPixels.begin(), rawPixels.end());
         }
       }
 
@@ -637,6 +619,7 @@ int main(int argc, char *argv[]) {
 
   // Associate a mesh name to its internal id.
   std::unordered_map<std::string, size_t> mapMeshNameToId;
+  std::unordered_map<std::string, size_t> mapMeshNameToMaterialId;
 
   auto const& meshIndices = getTypeListIndices( kNiMeshKey );
   for (size_t mesh_id = 0; mesh_id < meshIndices.size(); ++mesh_id) {
@@ -668,6 +651,8 @@ int main(int argc, char *argv[]) {
     size_t const meshMaterialIndex = current_material++; //
     auto &material = Materials[meshMaterialIndex];
     material.name = mesh.name + "_mat_" + std::to_string(meshMaterialIndex); //
+
+    mapMeshNameToMaterialId[mesh.name] = meshMaterialIndex; //
 
     //
     // [TODO]
@@ -731,16 +716,25 @@ int main(int argc, char *argv[]) {
       auto texProp = Niflib::StaticCast<Niflib::NiTexturingProperty>(prop);
       size_t texIndex;
 
+      // (I don't know where could be the diffuse texture in WotS4 files !)
+      // (intenal texture are fjust empty black transparent stuff, textures are elsewhere)
+      // if (auto texDesc = texProp->GetBaseTexture(); processTexDesc(texDesc, &texIndex)) {
+      //   DOJIMA_QUIET_LOG( ">>> " << texDesc.source->GetTextureFileName());
+      //   material.pbrMetallicRoughness.baseColorTexture.index = texIndex;
+      // }
+
       // Normal Texture.
       if (processTexDesc(texProp->GetNormalTexture(), &texIndex)) {
-        // material.normalTexture.index = texIndex;
+        material.normalTexture.index = texIndex;
       }
 
       // "Specular" Texture.
       // processTexDesc(texProp->GetGlossTexture(), &texIndex);
 
       // Some RGBA mask.
-      processTexDesc(texProp->GetDetailTexture(), &texIndex);
+      if (auto texDesc = texProp->GetDetailTexture(); processTexDesc(texDesc, &texIndex)) {
+        // material.pbrMetallicRoughness.baseColorTexture.index = texIndex; //
+      }
     }
     // ------------------------
 
@@ -852,7 +846,7 @@ int main(int argc, char *argv[]) {
           // Set the primitive indices accessor.
           prim.indices = current_accessor++;
 
-          auto &acc = Accessors[prim.indices];
+          auto &acc = Accessors.at(prim.indices);
           size_t const byteSize = SetAccessorFormat(formats[0], &acc);
 
           if (kNameAccessors) {
@@ -870,10 +864,10 @@ int main(int argc, char *argv[]) {
             auto const format = formats[comp_id];
             auto const& sem = md.componentSemantics[comp_id];
 
-            int const accessorIndex = current_accessor;
+            int const accessorIndex = current_accessor++;
 
             // Set acc default params depending on format.
-            auto &acc = Accessors[current_accessor++];
+            auto &acc = Accessors.at(accessorIndex);
             size_t const byteSize = SetAccessorFormat(format, &acc);
 
             // Set the primitive attribute accessor.
@@ -933,8 +927,8 @@ int main(int argc, char *argv[]) {
 
 
   // [lambda] recursive function to fill the node hierarchy.
-  std::function<void(tinygltf::Node*const, Niflib::NiAVObject *const)> fillNodes{
-    [&mapMeshNameToId, &Nodes, &fillNodes](tinygltf::Node *const parent, Niflib::NiAVObject *const nifAVO) -> void {
+  std::function<void(tinygltf::Node *const, Niflib::NiAVObject *const, size_t *)> fillNodes{
+    [&](tinygltf::Node *const parent, Niflib::NiAVObject *const nifAVO, size_t *mainTexId) -> void {
       // [ test, skip empty nodes ]
       // if (auto nifMesh = Niflib::DynamicCast<Niflib::NiMesh>(nifAVO); !nifMesh) {
       //   return;
@@ -963,6 +957,11 @@ int main(int argc, char *argv[]) {
 
       if (auto nifMesh = Niflib::DynamicCast<Niflib::NiMesh>(nifAVO); nifMesh) {
         node.mesh = mapMeshNameToId[node.name];
+
+        if (mainTexId) {
+          auto &mat = Materials.at(mapMeshNameToMaterialId[node.name]);
+          mat.pbrMetallicRoughness.baseColorTexture.index = *mainTexId; //
+        }
       }
 
       // [ TODO ] Detect meshLOD node (nifSwitchNode).
@@ -978,7 +977,7 @@ int main(int argc, char *argv[]) {
           // node.skin;
         }
         for (auto &child : nifNode->GetChildren()) {
-          fillNodes(&node, child);
+          fillNodes(&node, child, mainTexId);
         }
       }
     }
@@ -1033,35 +1032,39 @@ int main(int argc, char *argv[]) {
 
       // ---------------
       /* XXX Questionnable hack to bypass 2 'useless' nodes XXX */
-      if constexpr (true) {
-        if (auto child1 = Niflib::DynamicCast<Niflib::NiNode>(upperNode->GetChildren()[0]); child1) {
+      if constexpr (false)
+      {
+        if (auto child1 = Niflib::DynamicCast<Niflib::NiNode>(upperNode->GetChildren().at(0)); child1) {
           // (This bypass its sibbling node, probably useful for rigging)
-          upperNode = Niflib::DynamicCast<Niflib::NiNode>(child1->GetChildren()[1]);
+          upperNode = Niflib::DynamicCast<Niflib::NiNode>(child1->GetChildren().at(1));
         }
       }
       // ---------------
 
-      fillNodes(root_node_ptr, upperNode); //
-
-      // Diffuse texture.
+      // ---------------
+      // Load side albedo texture on Characters (can fails elsewhere).
       auto const pixelPart = pixelParts[i];
-      auto texPathNode = Niflib::StaticCast<Niflib::NiStringExtraData>(nifList[pixelPart.path_id]);
-      auto texPixelNode = Niflib::StaticCast<Niflib::NiPixelData>(nifList[pixelPart.data_id]);
+      auto texPathNode = Niflib::StaticCast<Niflib::NiStringExtraData>(nifList.at(pixelPart.path_id));
+      auto texPixelNode = Niflib::StaticCast<Niflib::NiPixelData>(nifList.at(pixelPart.data_id));
+
       if (size_t texIndex; processInternalTexture(texPixelNode, texPathNode->GetData(), &texIndex)) {
+        fillNodes(root_node_ptr, upperNode, &texIndex);
+
         // [ TODO ]
         // Associate each meshes material diffuse texture with the one defined by
         // their following upper texPixelNode (check with ID).
-
         // auto &pbr = material.pbrMetallicRoughness;
         // pbr.baseColorTextureindex = -1;  // required.
         // pbr.baseColorTexture.texCoord; // (texcoord index)
+      } else {
+        fillNodes(root_node_ptr, upperNode, nullptr);
       }
+
     }
   } else if (auto firstNode = Niflib::DynamicCast<Niflib::NiNode>(nifList[0]); firstNode) {
     // -- NIF Part.
-    DOJIMA_QUIET_LOG(">> nif part");
 
-    fillNodes(nullptr, firstNode);
+    fillNodes(nullptr, firstNode, nullptr);
   } else if (auto firstNode = Niflib::DynamicCast<Niflib::NiPixelData>(nifList[0]); firstNode) {
     // -- NIF PixelData.
     // WotS4 PixelData-only NIF files are encoded as BIG_ENDIAN and supposedly from a
@@ -1089,7 +1092,7 @@ int main(int argc, char *argv[]) {
     data.buffers = std::move( Buffers );
     data.nodes = std::move( Nodes );
 
-    if constexpr(false) {
+    if constexpr(true) {
       data.images = std::move( Images );
       data.textures = std::move( Textures );
       data.samplers = std::move( Samplers );
