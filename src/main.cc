@@ -31,6 +31,7 @@
 #pragma GCC diagnostic ignored "-Wignored-qualifiers"
 #pragma GCC diagnostic ignored "-Wtype-limits"
 #pragma GCC diagnostic ignored "-Wuseless-cast"
+#pragma GCC diagnostic ignored "-Wdeprecated-copy"
 #endif
 
 // NIF importer.
@@ -47,6 +48,8 @@
 #include "nif/obj/NiAlphaProperty.h"
 #include "nif/obj/NiMaterialProperty.h"
 #include "nif/obj/NiStencilProperty.h"
+#include "nif/obj/NiVertexColorProperty.h"
+#include "nif/obj/NiSpecularProperty.h"
 
 // Convert float16 to float32.
 #include "half/half.hpp"
@@ -91,8 +94,10 @@ namespace {
 // Display NIF header information at loading.
 static constexpr bool kDisplayHeader = true;
 
+static constexpr bool kShowDebugRefArborescence = false;
+
 // Output external PNG for debugging.
-static constexpr bool kDebugOutputPNG = true; //
+static constexpr bool kDebugOutputPNG = false; //
 static constexpr bool kDebugOutputDDS = false; //
 
 // Output name for accessors.
@@ -223,6 +228,8 @@ size_t SetAccessorFormat(Niflib::ComponentFormat format, tinygltf::Accessor *acc
 bool SetAttribute(Niflib::SemanticData cs, size_t accessorIndex, tinygltf::Primitive *prim, tinygltf::Accessor *accessor) {
   std::string const& name = cs.name;
   std::string const suffix{std::to_string(cs.index)};
+
+  // DOJIMA_QUIET_LOG( "setting attribute " << name );
 
   if ((name == "POSITION") || (name == "POSITION_BP")) {
     prim->attributes["POSITION"] = accessorIndex;
@@ -358,6 +365,11 @@ int main(int argc, char *argv[]) {
     }
   }
 
+  if (nifHeader.getVersion() == 0x1e10003) {
+    std::cerr << " * Theorical mesh count : " << getNumBlocks("NiColorExtraData") / 3 << std::endl;
+
+  }
+
   // --------------
 
   //
@@ -385,6 +397,31 @@ int main(int argc, char *argv[]) {
 
   auto nifList = Niflib::ReadNifList(nifFilename);
 
+  /* Show the refs arborescence structure of the Nif file. */
+  if constexpr(kShowDebugRefArborescence)
+  {
+    std::function<void(std::string, Niflib::NiObject*)> showRefs = [&](std::string prefix, auto n) {
+      auto ptrs = n->GetRefs();
+      for (auto pp : ptrs) {
+        DOJIMA_LOG(prefix << "   > " << pp->GetType().GetTypeName()  << " " );
+        showRefs(prefix + "  ", pp);
+      }
+    };
+
+    for (size_t i = 0; i < nifList.size(); ++i) {
+      auto node = nifList[i];
+      auto ptr = Niflib::DynamicCast<Niflib::NiAVObject>(node);
+
+      DOJIMA_LOG( i << " "  << node->GetType().GetTypeName() );
+
+      if (ptr) {
+        showRefs(" ", ptr);
+      }
+    }
+
+    // return -1;
+  }
+
   // Determine the bytesize of the global Index & Vertex buffers.
   size_t indicesBytesize = 0;
   size_t verticesBytesize = 0;
@@ -410,7 +447,7 @@ int main(int argc, char *argv[]) {
   // *Theorical* uncompressed total bytelength for images.
   size_t constexpr kRawPixelsDefaultSize{ 4 * 1024 * 1024 }; //
   size_t const kNumTextures{ getNumBlocks(kNiPixelDataKey) };
-  size_t const imagesBytesize = kRawPixelsDefaultSize * kNumTextures;
+  // size_t const imagesBytesize = kRawPixelsDefaultSize * kNumTextures;
 
   // Create the base glTF buffers.
   std::vector<tinygltf::Buffer> Buffers(static_cast<size_t>(BufferId::kCount));
@@ -431,7 +468,7 @@ int main(int argc, char *argv[]) {
   // Offset to current buffers' end, used to build buffer viewers.
   size_t indexBufferOffset = 0;
   size_t vertexBufferOffset = 0;
-  size_t imageBufferOffset = 0;
+  // size_t imageBufferOffset = 0;
 
   // Retrieve the number of NIF mesh nodes.
   size_t const kNiMeshCount{ getNumBlocks(kNiMeshKey) };
@@ -457,7 +494,7 @@ int main(int argc, char *argv[]) {
   // Submeshes buffers.
   size_t const kNumAttributes = static_cast<size_t>(AttributeId::kCount); // (might be lower)
   size_t constexpr kNumAccessorPerSubmesh{ 1 + kNumAttributes };
-  std::vector<tinygltf::Accessor> Accessors( totalSubmeshesCount * kNumAccessorPerSubmesh );
+  std::vector<tinygltf::Accessor> Accessors( totalSubmeshesCount * kNumAccessorPerSubmesh ); // ..
 
   // Materials buffer.
   // Depends on textures, MaterialData & NiMaterialProperty.
@@ -497,14 +534,15 @@ int main(int argc, char *argv[]) {
     [&](Niflib::Ref<Niflib::NiPixelData> const& nifPixelData, std::string const& texFilename, size_t* texIndex) -> size_t {
       // Check the texture has not been loaded yet.
       if (auto it = mapTextureNameToIndex.find(texFilename); it != mapTextureNameToIndex.end()) {
-        DOJIMA_QUIET_LOG(texFilename << " already loaded.");
+        // DOJIMA_QUIET_LOG(texFilename << " already loaded.");
         *texIndex = it->second;
         return true;
       }
 
       auto const fmt = nifPixelData->GetPixelFormat();
       if ((Niflib::PX_FMT_DXT1 != fmt) &&
-          (Niflib::PX_FMT_DXT5 != fmt)) {
+          (Niflib::PX_FMT_DXT5 != fmt) &&
+          (Niflib::PX_FMT_DXT5_ALT != fmt)) {
         DOJIMA_QUIET_LOG( texFilename << " [" << fmt << "] : non DXT1 / DXT5 textures are not supported yet." );
         return false;
       }
@@ -554,7 +592,7 @@ int main(int argc, char *argv[]) {
             0xff000000, // nifPixelData->GetAlphaMask(),
           };
           dds.build(levels, img.width, img.height, fmt, mask, pixelBytes);
-          dds.save(std::string(outputDirectory + img.name + ".dds"));
+          dds.save(outputDirectory + img.name + ".dds");
         }
 
         // Decompress the internal DDS texture.
@@ -562,35 +600,17 @@ int main(int argc, char *argv[]) {
         rawPixels.resize( rowStride * img.height );
         decompressDXT(img.width, img.height, pixelBytes.data(), (uint32_t *)rawPixels.data());
 
+        std::string const uri{outputDirectory + img.name + ".png"};
+
         // Save image as PNG.
         if constexpr (kDebugOutputPNG) {
-          // (external)
-
-          std::string const uri{outputDirectory + img.name + ".png"};
           stbi_write_png(uri.c_str(), img.width, img.height, img.component, rawPixels.data(), rowStride);
-        } else {
+        }
+
+        {
           // (internal)
-
-          auto pngToMemory{[](void *context, void *data, int size) -> void {
-            auto img = reinterpret_cast<tinygltf::Image*>(context);
-            auto pngBytes = reinterpret_cast<uint8_t const*>(data);
-            img->image.clear();
-            img->image.insert(img->image.end(), pngBytes, pngBytes + size);
-          }};
-          int const writeSuccess{stbi_write_png_to_func(
-            pngToMemory, &img, img.width, img.height, img.component, rawPixels.data(), rowStride
-          )};
-
-          // [ TODO ] Fill internal image buffer.
-          if (writeSuccess) {
-            // auto& bufferView = BufferViews[current_buffer_view++];
-            // img.mimeType = "image/png";
-            // img.bufferView = current_buffer_view;
-            // bufferView.buffer = (int)BufferId::IMAGE;
-            // bufferView.byteOffset = imageBufferOffset;
-            // bufferView.byteLength = img.image.size();
-            // imageBufferOffset += bufferView.byteLength;
-          }
+          img.uri = uri; //
+          img.image.insert(img.image.begin(), rawPixels.begin(), rawPixels.end());
         }
       }
 
@@ -627,6 +647,7 @@ int main(int argc, char *argv[]) {
 
   // Associate a mesh name to its internal id.
   std::unordered_map<std::string, size_t> mapMeshNameToId;
+  std::unordered_map<std::string, size_t> mapMeshNameToMaterialId;
 
   auto const& meshIndices = getTypeListIndices( kNiMeshKey );
   for (size_t mesh_id = 0; mesh_id < meshIndices.size(); ++mesh_id) {
@@ -657,12 +678,23 @@ int main(int argc, char *argv[]) {
     //
     size_t const meshMaterialIndex = current_material++; //
     auto &material = Materials[meshMaterialIndex];
-    // material.name = mesh.name + "::material";
+    material.name = mesh.name + "_mat_" + std::to_string(meshMaterialIndex); //
 
-    // Prefer using the specular or SpecularGlossiness extensions, see :
+    mapMeshNameToMaterialId[mesh.name] = meshMaterialIndex; //
+
+    //
+    // [TODO]
+    // Prefer using the specular or SpecularGlossiness GLTF extensions, rather
+    // than pbrMetallicRoughness. See :
     //   https://kcoley.github.io/glTF/extensions/2.0/Khronos/KHR_materials_pbrSpecularGlossiness/
-    // if (auto prop = nifMesh->GetPropertyByType(Niflib::NiVertexColorProperty::TYPE); prop) {}
-    // if (auto prop = nifMesh->GetPropertyByType(Niflib::NiSpecularProperty::TYPE); prop) {}
+    //
+
+    // if (auto prop = nifMesh->GetPropertyByType(Niflib::NiSpecularProperty::TYPE); prop) {
+    //   DOJIMA_QUIET_LOG( material.name << ": A specular property was detected but not used." );
+    // }
+    // if (auto prop = nifMesh->GetPropertyByType(Niflib::NiVertexColorProperty::TYPE); prop) {
+    //   DOJIMA_QUIET_LOG( material.name << ": A vertex color property was detected but not used." );
+    // }
 
     // Basic / non-PBR parameters.
     if (auto prop = nifMesh->GetPropertyByType(Niflib::NiMaterialProperty::TYPE); prop) {
@@ -712,16 +744,25 @@ int main(int argc, char *argv[]) {
       auto texProp = Niflib::StaticCast<Niflib::NiTexturingProperty>(prop);
       size_t texIndex;
 
+      // (I don't know where could be the diffuse texture in WotS4 files !)
+      // (intenal texture are fjust empty black transparent stuff, textures are elsewhere)
+      if (auto texDesc = texProp->GetBaseTexture(); processTexDesc(texDesc, &texIndex)) {
+        // DOJIMA_QUIET_LOG( ">>> " << texDesc.source->GetTextureFileName());
+        material.pbrMetallicRoughness.baseColorTexture.index = texIndex;
+      }
+
       // Normal Texture.
       if (processTexDesc(texProp->GetNormalTexture(), &texIndex)) {
-        // material.normalTexture.index = texIndex;
+        material.normalTexture.index = texIndex;
       }
 
       // "Specular" Texture.
       // processTexDesc(texProp->GetGlossTexture(), &texIndex);
 
       // Some RGBA mask.
-      processTexDesc(texProp->GetDetailTexture(), &texIndex);
+      if (auto texDesc = texProp->GetDetailTexture(); processTexDesc(texDesc, &texIndex)) {
+        // material.pbrMetallicRoughness.baseColorTexture.index = texIndex; //
+      }
     }
     // ------------------------
 
@@ -808,6 +849,7 @@ int main(int argc, char *argv[]) {
         break;
 
         default:
+            DOJIMA_QUIET_LOG( "[Warning] unused DataStreamUsage found ." );
         break;
       };
 
@@ -832,32 +874,36 @@ int main(int argc, char *argv[]) {
           // Set the primitive indices accessor.
           prim.indices = current_accessor++;
 
-          auto &acc = Accessors[prim.indices];
+          auto &acc = Accessors.at(prim.indices);
           size_t const byteSize = SetAccessorFormat(formats[0], &acc);
 
-          if (kNameAccessors) acc.name = "INDEX";
+          if (kNameAccessors) {
+            acc.name = "INDEX";
+          }
           acc.bufferView = bufferViewIndex;
           acc.normalized = false;
           acc.byteOffset = region.startIndex * byteSize;
           acc.count = region.numIndices;
         } else {
-          // -- Vertices
+          // -- Vertex attributes
 
           size_t vertexBaseOffset = region.startIndex * bufferView.byteStride;
           for (int comp_id = 0; comp_id < md.numComponents; ++comp_id) {
             auto const format = formats[comp_id];
             auto const& sem = md.componentSemantics[comp_id];
 
-            int const accessorIndex = current_accessor;
+            int const accessorIndex = current_accessor++;
 
             // Set acc default params depending on format.
-            auto &acc = Accessors[current_accessor++];
+            auto &acc = Accessors.at(accessorIndex);
             size_t const byteSize = SetAccessorFormat(format, &acc);
 
             // Set the primitive attribute accessor.
             SetAttribute(sem, accessorIndex, &prim, &acc);
 
-            if (kNameAccessors) acc.name = sem.name;
+            if (kNameAccessors) {
+              acc.name = sem.name;
+            }
             acc.bufferView = bufferViewIndex;
             acc.byteOffset = vertexBaseOffset;
             acc.count = region.numIndices;
@@ -879,19 +925,38 @@ int main(int argc, char *argv[]) {
 
   // -- Node hierarchy.
 
+  std::vector<tinygltf::Node> Nodes{};
+  tinygltf::Node *root_node_ptr = nullptr;
+
+  // Detects if the NIF file is a pack.
+  uint32_t numSubParts = 0u;
+  if (auto firstNode = Niflib::DynamicCast<Niflib::NiIntegerExtraData>(nifList[0]); firstNode) {
+    numSubParts = firstNode->GetData() / 2u;
+    DOJIMA_QUIET_LOG( "Detected Nif subparts : " << numSubParts );
+  }
+
+  // (only use a common root on NifPack)
+  bool kUseRootNode = (numSubParts > 0u);
+
   // Determine the total number of hierarchical nodes.
-  size_t totalNodeCount = 0;
+  size_t totalNodeCount = kUseRootNode ? 1 : 0;
   for (auto const& n : nifList) {
     auto ptr = Niflib::DynamicCast<Niflib::NiAVObject>(n);
     totalNodeCount += (ptr != nullptr) ? 1 : 0;
   }
 
-  std::vector<tinygltf::Node> Nodes;
   Nodes.reserve(totalNodeCount);
 
+  if (kUseRootNode) {
+    Nodes.push_back({});
+    root_node_ptr = &Nodes[0];
+    root_node_ptr->name = "root";
+  }
+
+
   // [lambda] recursive function to fill the node hierarchy.
-  std::function<void(tinygltf::Node*const, Niflib::NiAVObject *const)> fillNodes{
-    [&mapMeshNameToId, &Nodes, &fillNodes](tinygltf::Node *const parent, Niflib::NiAVObject *const nifAVO) -> void {
+  std::function<void(tinygltf::Node *const, Niflib::NiAVObject *const, size_t *)> fillNodes{
+    [&](tinygltf::Node *const parent, Niflib::NiAVObject *const nifAVO, size_t *mainTexId) -> void {
       // [ test, skip empty nodes ]
       // if (auto nifMesh = Niflib::DynamicCast<Niflib::NiMesh>(nifAVO); !nifMesh) {
       //   return;
@@ -909,6 +974,11 @@ int main(int argc, char *argv[]) {
 
       node.name = nifAVO->GetName();
 
+      // auto nnn = Niflib::DynamicCast<Niflib::NiNode>(nifAVO);
+      // DOJIMA_LOG( mapNodeNameToId[node.name] // < " " << (nnn ? nnn->GetType().GetTypeName() : "")
+      //                                        << " " << node.name
+      //           );
+
       auto const& qRotation = nifAVO->GetLocalRotation().AsQuaternion();
       node.rotation = { (double)qRotation.x, (double)qRotation.y, (double)qRotation.z, (double)qRotation.w };
 
@@ -920,6 +990,11 @@ int main(int argc, char *argv[]) {
 
       if (auto nifMesh = Niflib::DynamicCast<Niflib::NiMesh>(nifAVO); nifMesh) {
         node.mesh = mapMeshNameToId[node.name];
+
+        if (mainTexId) {
+          auto &mat = Materials.at(mapMeshNameToMaterialId[node.name]);
+          mat.pbrMetallicRoughness.baseColorTexture.index = *mainTexId; //
+        }
       }
 
       // [ TODO ] Detect meshLOD node (nifSwitchNode).
@@ -935,12 +1010,11 @@ int main(int argc, char *argv[]) {
           // node.skin;
         }
         for (auto &child : nifNode->GetChildren()) {
-          fillNodes(&node, child);
+          fillNodes(&node, child, mainTexId);
         }
       }
     }
   };
-
 
   // (on NIF's "Characters Pack")
   //
@@ -952,15 +1026,9 @@ int main(int argc, char *argv[]) {
   //
   // The PixelData representing the DDS DXT1/5 diffuse texture for the mesh.
   //
-
-  // Detects if the NIF file is a pack.
-  uint32_t numSubParts = 0u;
-  if (auto firstNode = Niflib::DynamicCast<Niflib::NiIntegerExtraData>(nifList[0]); firstNode) {
-    numSubParts = firstNode->GetData() / 2u;
-  }
-
   if (bool const bNIFPack = (numSubParts > 0u); bNIFPack) {
     // -- NIF Pack.
+    DOJIMA_QUIET_LOG(">> nif pack");
 
     struct PartIndices_t {
       int path_id = -1; // index to a NiStringExtraData containing a path.
@@ -994,25 +1062,50 @@ int main(int argc, char *argv[]) {
       // Geometry.
       auto const nodeId = nodeParts[i].data_id;
       auto upperNode = Niflib::StaticCast<Niflib::NiNode>(nifList[nodeId]);
-      fillNodes(nullptr, upperNode);
 
-      // Diffuse texture.
+      // ---------------
+      /* XXX Questionnable hack to bypass 2 'useless' nodes XXX */
+      if constexpr (false)
+      {
+        if (auto child1 = Niflib::DynamicCast<Niflib::NiNode>(upperNode->GetChildren().at(0)); child1) {
+          // (This bypass its sibbling node, probably useful for rigging)
+          upperNode = Niflib::DynamicCast<Niflib::NiNode>(child1->GetChildren().at(1));
+        }
+      }
+      // ---------------
+
+      // ---------------
+      // Load side albedo texture on Characters (can fails elsewhere).
       auto const pixelPart = pixelParts[i];
-      auto texPathNode = Niflib::StaticCast<Niflib::NiStringExtraData>(nifList[pixelPart.path_id]);
-      auto texPixelNode = Niflib::StaticCast<Niflib::NiPixelData>(nifList[pixelPart.data_id]);
+      auto texPathNode = Niflib::StaticCast<Niflib::NiStringExtraData>(nifList.at(pixelPart.path_id));
+      auto texPixelNode = Niflib::StaticCast<Niflib::NiPixelData>(nifList.at(pixelPart.data_id));
+
       if (size_t texIndex; processInternalTexture(texPixelNode, texPathNode->GetData(), &texIndex)) {
+        fillNodes(root_node_ptr, upperNode, &texIndex);
+
         // [ TODO ]
         // Associate each meshes material diffuse texture with the one defined by
         // their following upper texPixelNode (check with ID).
-
         // auto &pbr = material.pbrMetallicRoughness;
         // pbr.baseColorTextureindex = -1;  // required.
         // pbr.baseColorTexture.texCoord; // (texcoord index)
+      } else {
+        fillNodes(root_node_ptr, upperNode, nullptr);
       }
+
     }
   } else if (auto firstNode = Niflib::DynamicCast<Niflib::NiNode>(nifList[0]); firstNode) {
     // -- NIF Part.
-    fillNodes(nullptr, firstNode);
+
+    // [wip] Retrieve side source textures, not found within mesh nodes.
+    // auto const& sourceTexList = getTypeListIndices( "NiSourceTexture" );
+    // for (size_t i = 0; i < sourceTexList.size(); ++i) {
+    //   size_t texIndex;
+    //   auto srcTexNode = Niflib::StaticCast<Niflib::NiSourceTexture>(nifList.at(sourceTexList[i]));
+    //   processInternalTexture(srcTexNode->GetPixelData(), srcTexNode->GetTextureFileName(), &texIndex);
+    // }
+
+    fillNodes(nullptr, firstNode, nullptr);
   } else if (auto firstNode = Niflib::DynamicCast<Niflib::NiPixelData>(nifList[0]); firstNode) {
     // -- NIF PixelData.
     // WotS4 PixelData-only NIF files are encoded as BIG_ENDIAN and supposedly from a
@@ -1040,7 +1133,7 @@ int main(int argc, char *argv[]) {
     data.buffers = std::move( Buffers );
     data.nodes = std::move( Nodes );
 
-    if constexpr(false) {
+    if constexpr(true) {
       data.images = std::move( Images );
       data.textures = std::move( Textures );
       data.samplers = std::move( Samplers );

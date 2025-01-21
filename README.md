@@ -1,19 +1,21 @@
 [![unlicense](https://img.shields.io/badge/Unlicense-%23373737)](https://unlicense.org/)
 ![language: c++17](https://img.shields.io/badge/c++-17-blue.svg)
+![Stage: alpha](https://img.shields.io/badge/-alpha-red)
 
 # ⚒ Dojima
 
-**Dojima** is a command line tool to convert NetImmerse / Gamebryo `NIF` files from the game « _Way of the Samurai 4_ » to `glTF 2.0`.
+![](https://i.imgur.com/NXNuEpB.png)
+
+**Dojima** is a command line tool to convert NetImmerse / Gamebryo `NIF` files from the games « _Way of the Samurai_ » 3 and 4 to `glTF 2.0`.
 
 #### Features
 
-- [x] mesh hierarchy (*Characters*),
+- [x] mesh hierarchy (*Maps, Characters*),
 - [x] float16 buffers (*Maps, Items, Accessories & Weapons*),
-- [ ] materials,
+- [x] materials,
 - [ ] bones,
 - [ ] skeletal animation,
-- [ ] facial animation,
-- [ ] extra properties.
+- [ ] facial animation
 
 ### Quick start
 
@@ -39,7 +41,7 @@ respective license. They are :
 * [half.hpp](http://half.sourceforge.net/) : Half-precision floating-point library.
 * [s3tc](https://github.com/Benjamin-Dobell/s3tc-dxt-decompression) : Routines for DXT1/DXT5 decompression.
 
-`ACQUIRE's Way of the Samurai 4` can be acquired from steam [here](https://store.steampowered.com/app/312780/Way_of_the_Samurai_4/).
+The games *`Way of the Samurai`* are available on steam [here](https://store.steampowered.com/app/427510/Way_of_the_Samurai_3) and [here](https://store.steampowered.com/app/312780/Way_of_the_Samurai_4/).
 
 ### Unlicense
 
