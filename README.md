@@ -3,6 +3,8 @@
 
 # ⚒ Dojima
 
+![](https://i.imgur.com/NXNuEpB.png)
+
 **Dojima** is a command line tool to convert NetImmerse / Gamebryo `NIF` files from the game « _Way of the Samurai 4_ » to `glTF 2.0`.
 
 #### Features
