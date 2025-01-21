@@ -1,12 +1,14 @@
 // ----------------------------------------------------------------------------
 //
-//    Work In Progress converter for WotS 3 files.
+//    (Work In Progress) Converter for WotS 3 files.
 //
 //    Based on meshes using NiTriStrips nodes (ie. items, maps).
 //    Characters are not supported.
 //
-//    Currently export triangular meshes with no material or additional
-//    vertex attributes.
+//    Currently export triangular meshes (Maps and iterms) with basic materials
+//    and texture coordinates but no normals. Characters are not supported.
+//
+//    TODO : fix embeded image in GLB
 //
 // ----------------------------------------------------------------------------
 
