@@ -2,13 +2,12 @@
 //
 //    (Work In Progress) Converter for WotS 3 files.
 //
-//    Based on meshes using NiTriStrips nodes (ie. items, maps).
-//    Characters are not supported.
+//    Based on meshes using NiTriStrips nodes (ie. items, maps). Extract
+//    basic materials and texture coordinates but not normals.
+//    Characters export are not supported yet (use NiTriShape).
 //
-//    Currently export triangular meshes (Maps and iterms) with basic materials
-//    and texture coordinates but no normals. Characters are not supported.
-//
-//    TODO : fix embeded image in GLB
+//    TODO : - fix embeded image in GLB
+//           - remove redundant bufferview creation
 //
 // ----------------------------------------------------------------------------
 
@@ -36,7 +35,6 @@
 #include "nif/gen/Header.h"
 #include "nif/obj/NiNode.h"
 #include "nif/obj/NiMesh.h"
-
 #include "nif/obj/NiAlphaProperty.h"
 #include "nif/obj/NiIntegerExtraData.h"
 #include "nif/obj/NiMaterialProperty.h"

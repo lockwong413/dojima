@@ -1,17 +1,15 @@
 // ----------------------------------------------------------------------------
 //
-// [ Roadmap - TODO ]
+//    (Work In Progress) Converter for WotS 4 files (Characters and Maps).
 //
+//    TODO
 //      * Fix mesh attributes buffers to remove NIF's BINORMAL and
-//  recompute TANGENT to be true VEC4 (this will requiered to change bufferView and accessors too).
-//
-//      * Export materials with diffuse texture properly.
-//
-//      * Export normal textures.
+//  recompute TANGENT to be true VEC4 (this will require to change
+//  bufferView and accessors too).
 //
 //
-// Use a glTF validator to check errors and warnings.
-//  ( https://github.khronos.org/glTF-Validator/ )
+//  Use a glTF validator to check errors and warnings.
+//    ( https://github.khronos.org/glTF-Validator/ )
 //
 // ----------------------------------------------------------------------------
 
