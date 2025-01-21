@@ -1,13 +1,14 @@
 # -----------------------------------------------------------------------------
 
 set(TARGET nif2gltf)
-add_executable(${TARGET}
-  # main.cc
-  wots3.cc
-)
+add_executable(${TARGET} main.cc)
+
+# (wip)
+add_executable(wots3 wots3.cc)
 
 list(APPEND Targets
   ${TARGET}
+  wots3
 )
 
 # -----------------------------------------------------------------------------
