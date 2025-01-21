@@ -94,6 +94,8 @@ namespace {
 // Display NIF header information at loading.
 static constexpr bool kDisplayHeader = true;
 
+static constexpr bool kShowDebugRefArborescence = false;
+
 // Output external PNG for debugging.
 static constexpr bool kDebugOutputPNG = false; //
 static constexpr bool kDebugOutputDDS = false; //
@@ -395,6 +397,31 @@ int main(int argc, char *argv[]) {
 
   auto nifList = Niflib::ReadNifList(nifFilename);
 
+  /* Show the refs arborescence structure of the Nif file. */
+  if constexpr(kShowDebugRefArborescence)
+  {
+    std::function<void(std::string, Niflib::NiObject*)> showRefs = [&](std::string prefix, auto n) {
+      auto ptrs = n->GetRefs();
+      for (auto pp : ptrs) {
+        DOJIMA_LOG(prefix << "   > " << pp->GetType().GetTypeName()  << " " );
+        showRefs(prefix + "  ", pp);
+      }
+    };
+
+    for (size_t i = 0; i < nifList.size(); ++i) {
+      auto node = nifList[i];
+      auto ptr = Niflib::DynamicCast<Niflib::NiAVObject>(node);
+
+      DOJIMA_LOG( i << " "  << node->GetType().GetTypeName() );
+
+      if (ptr) {
+        showRefs(" ", ptr);
+      }
+    }
+
+    // return -1;
+  }
+
   // Determine the bytesize of the global Index & Vertex buffers.
   size_t indicesBytesize = 0;
   size_t verticesBytesize = 0;
@@ -507,14 +534,15 @@ int main(int argc, char *argv[]) {
     [&](Niflib::Ref<Niflib::NiPixelData> const& nifPixelData, std::string const& texFilename, size_t* texIndex) -> size_t {
       // Check the texture has not been loaded yet.
       if (auto it = mapTextureNameToIndex.find(texFilename); it != mapTextureNameToIndex.end()) {
-        DOJIMA_QUIET_LOG(texFilename << " already loaded.");
+        // DOJIMA_QUIET_LOG(texFilename << " already loaded.");
         *texIndex = it->second;
         return true;
       }
 
       auto const fmt = nifPixelData->GetPixelFormat();
       if ((Niflib::PX_FMT_DXT1 != fmt) &&
-          (Niflib::PX_FMT_DXT5 != fmt)) {
+          (Niflib::PX_FMT_DXT5 != fmt) &&
+          (Niflib::PX_FMT_DXT5_ALT != fmt)) {
         DOJIMA_QUIET_LOG( texFilename << " [" << fmt << "] : non DXT1 / DXT5 textures are not supported yet." );
         return false;
       }
@@ -718,10 +746,10 @@ int main(int argc, char *argv[]) {
 
       // (I don't know where could be the diffuse texture in WotS4 files !)
       // (intenal texture are fjust empty black transparent stuff, textures are elsewhere)
-      // if (auto texDesc = texProp->GetBaseTexture(); processTexDesc(texDesc, &texIndex)) {
-      //   DOJIMA_QUIET_LOG( ">>> " << texDesc.source->GetTextureFileName());
-      //   material.pbrMetallicRoughness.baseColorTexture.index = texIndex;
-      // }
+      if (auto texDesc = texProp->GetBaseTexture(); processTexDesc(texDesc, &texIndex)) {
+        // DOJIMA_QUIET_LOG( ">>> " << texDesc.source->GetTextureFileName());
+        material.pbrMetallicRoughness.baseColorTexture.index = texIndex;
+      }
 
       // Normal Texture.
       if (processTexDesc(texProp->GetNormalTexture(), &texIndex)) {
@@ -946,6 +974,11 @@ int main(int argc, char *argv[]) {
 
       node.name = nifAVO->GetName();
 
+      // auto nnn = Niflib::DynamicCast<Niflib::NiNode>(nifAVO);
+      // DOJIMA_LOG( mapNodeNameToId[node.name] // < " " << (nnn ? nnn->GetType().GetTypeName() : "")
+      //                                        << " " << node.name
+      //           );
+
       auto const& qRotation = nifAVO->GetLocalRotation().AsQuaternion();
       node.rotation = { (double)qRotation.x, (double)qRotation.y, (double)qRotation.z, (double)qRotation.w };
 
@@ -1063,6 +1096,14 @@ int main(int argc, char *argv[]) {
     }
   } else if (auto firstNode = Niflib::DynamicCast<Niflib::NiNode>(nifList[0]); firstNode) {
     // -- NIF Part.
+
+    // [wip] Retrieve side source textures, not found within mesh nodes.
+    // auto const& sourceTexList = getTypeListIndices( "NiSourceTexture" );
+    // for (size_t i = 0; i < sourceTexList.size(); ++i) {
+    //   size_t texIndex;
+    //   auto srcTexNode = Niflib::StaticCast<Niflib::NiSourceTexture>(nifList.at(sourceTexList[i]));
+    //   processInternalTexture(srcTexNode->GetPixelData(), srcTexNode->GetTextureFileName(), &texIndex);
+    // }
 
     fillNodes(nullptr, firstNode, nullptr);
   } else if (auto firstNode = Niflib::DynamicCast<Niflib::NiPixelData>(nifList[0]); firstNode) {
